@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>7f213eab-d953-4fbf-bfa3-6667124318a6</UserSecretsId>
+  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DocumentationFile>C:\Users\hp\source\repos\WalletPlusIncAPI\WalletPlusIncAPI\WalletPlusIncAPI.xml</DocumentationFile>
+		<WarningLevel>0</WarningLevel>
+	</PropertyGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.8" />
+	  <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.8" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.8">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="Microsoft.Extensions.Azure" Version="1.1.0" />
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	  <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WalletPlusIncAPI.Data\WalletPlusIncAPI.Data.csproj" />
+    <ProjectReference Include="..\WalletPlusIncAPI.Models\WalletPlusIncAPI.Models.csproj" />
+    <ProjectReference Include="..\WalletPlusIncAPI.Services\WalletPlusIncAPI.Services.csproj" />
+  </ItemGroup>
+
+</Project>

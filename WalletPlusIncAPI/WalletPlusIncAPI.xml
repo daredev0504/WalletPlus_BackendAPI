@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>WalletPlusIncAPI</name>
+    </assembly>
+    <members>
+        <member name="M:WalletPlusIncAPI.Controllers.AuthController.SignUp(WalletPlusIncAPI.Models.Dtos.AppUser.AppUserRegisterDto)">
+            <summary>
+            Registers a new user automatically creating a main wallet for the user.
+            </summary>
+            <param name="appUserRegisterDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.AuthController.Login(WalletPlusIncAPI.Models.Dtos.AppUser.AppUserLoginDto)">
+            <summary>
+             User with accounts can Log in
+            </summary>
+            <param name="appUserLogin"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.AuthController.ConfirmEmail(System.String,System.String)">
+            <summary>
+            confirms your email
+            </summary>
+            <param name="token"></param>
+            <param name="email"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.AuthController.SuccessRegistration">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.AuthController.GetUser(System.String)">
+            <summary>
+            Allows only logged-in admin to account details of any user
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.AuthController.GetMyDetails">
+            <summary>
+            Allows any logged in user to get his/her account details
+            </summary>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
