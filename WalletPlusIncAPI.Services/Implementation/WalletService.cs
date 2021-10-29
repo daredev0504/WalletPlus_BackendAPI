@@ -21,7 +21,6 @@ namespace WalletPlusIncAPI.Services.Implementation
     {
         private readonly IMapper _mapper;
         private readonly ITransactionService _transactionService;
-        private readonly IFundRepository _fundRepository;
         private readonly IWalletRepository _walletRepository;
         private readonly ICurrencyService _currencyService;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -30,15 +29,15 @@ namespace WalletPlusIncAPI.Services.Implementation
         
 
 
-        public WalletService(IServiceProvider serviceProvider, IHttpContextAccessor httpContextAccessor, UserManager<AppUser> userManager)
+        public WalletService(IServiceProvider serviceProvider)
         {
             _mapper = serviceProvider.GetRequiredService<IMapper>();
             _transactionService = serviceProvider.GetRequiredService<ITransactionService>();
-            _fundRepository = serviceProvider.GetRequiredService<IFundRepository>();
             _walletRepository = serviceProvider.GetRequiredService<IWalletRepository>();
             _currencyService = serviceProvider.GetRequiredService<ICurrencyService>();
-            _httpContextAccessor = httpContextAccessor;
-            _userManager = userManager;
+            _httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+            _userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
+
            
             
         }

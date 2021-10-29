@@ -150,23 +150,16 @@
             Controller
             </summary>
         </member>
-        <member name="M:WalletPlusIncAPI.Controllers.WalletController.CreateWallet(WalletPlusIncAPI.Models.Dtos.Wallet.WalletCreateDto)">
-            <summary>
-            Allows logged in Premium or Free account holders to create a wallet
-            </summary>
-            <param name="walletDto"></param>
-            <returns></returns>
-        </member>
         <member name="M:WalletPlusIncAPI.Controllers.WalletController.DeleteWallet(System.Guid)">
             <summary>
-            Allows logged in Premium or Free account holders to delete their wallet
+            Allows logged in Premium account holders to delete their wallet
             </summary>
             <param name="id"></param>
             <returns></returns>
         </member>
         <member name="M:WalletPlusIncAPI.Controllers.WalletController.UpdateWallet(WalletPlusIncAPI.Models.Dtos.Wallet.WalletUpdateDto)">
             <summary>
-            Allows logged in Premium or Free account holders to update their wallet
+            Allows logged in Premium account holders to update their wallet
             </summary>
             <param name="walletDto"></param>
             <returns></returns>

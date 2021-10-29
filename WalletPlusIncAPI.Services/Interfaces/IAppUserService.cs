@@ -10,7 +10,7 @@ namespace WalletPlusIncAPI.Services.Interfaces
     public interface IAppUserService
     {
         string GetUserId();
-        Task<ServiceResponse<AppUserReadDto>> SignUp(AppUserRegisterDto model, IUrlHelper url, string requestScheme);
+        Task<ServiceResponse<AppUserReadDto>> SignUp(AppUserRegisterDto model);
        
         Task<ServiceResponse<string>> UpdateUser(AppUser user, AppUserUpdateDto model);
         Task<PagedList<AppUserReadDto>> GetUsers(AppUserParameters parameters);

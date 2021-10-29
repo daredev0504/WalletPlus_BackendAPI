@@ -43,7 +43,7 @@ namespace WalletPlusIncAPI.Services.Implementation
 
         public string GetUserId() => _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        public async Task<ServiceResponse<AppUserReadDto>> SignUp(AppUserRegisterDto model, IUrlHelper url, string requestScheme)
+        public async Task<ServiceResponse<AppUserReadDto>> SignUp(AppUserRegisterDto model)
         {
             ServiceResponse<AppUserReadDto> response = new ServiceResponse<AppUserReadDto>();
 

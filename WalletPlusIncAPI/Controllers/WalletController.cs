@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using WalletPlusIncAPI.Filters;
 using WalletPlusIncAPI.Helpers;
 using WalletPlusIncAPI.Models.Dtos.Wallet;
@@ -24,55 +25,17 @@ namespace WalletPlusIncAPI.Controllers
         private readonly IAppUserService _appUserService;
         private readonly IFundingService _fundsService;
         
-        public WalletController(IWalletService walletService, ICurrencyService currencyService, IAppUserService appUserService, IFundingService fundsService)
+        public WalletController(IServiceProvider serviceProvider)
         {
-            _walletService = walletService;
-            _currencyService = currencyService;
-            _appUserService = appUserService;
-            _fundsService = fundsService;
+            _walletService = serviceProvider.GetRequiredService<IWalletService>();
+            _currencyService = serviceProvider.GetRequiredService<ICurrencyService>();
+            _appUserService = serviceProvider.GetRequiredService<IAppUserService>();
+            _fundsService = serviceProvider.GetRequiredService<IFundingService>();
         }
 
-        /// <summary>
-        /// Allows logged in Premium or Free account holders to create a wallet
-        /// </summary>
-        /// <param name="walletDto"></param>
-        /// <returns></returns>
-        [Authorize(Roles = "Premium")]
-        [HttpPost("createWallet")]
-        [ServiceFilter(typeof(ValidationFilterAttribute))]
-        public async Task<IActionResult> CreateWallet(WalletCreateDto walletDto)
-        {
-
-            var loggedInUserId = _walletService.GetUserId();
-
-            var userWallets = _walletService.GetWalletsByUserId(loggedInUserId);
-
-            var user = await _appUserService.GetUser(loggedInUserId);
-            var userRoles = await _appUserService.GetUserRoles(user.Data);
-
-            if (userRoles.Contains("Free") && userWallets.Data.Count > 0)
-                return BadRequest(ResponseMessage.Message("Already has a wallet",
-                    "your account type is only allowed to have one wallet", walletDto));
-
-            var wallet = new Wallet()
-            {
-                Balance = 0,
-                OwnerId = loggedInUserId,
-                CurrencyId = walletDto.CurrencyId,
-                IsMain = false
-            };
-
-            var created = await _walletService.AddWallet(wallet);
-
-            if (!created.Data)
-                return BadRequest(ResponseMessage.Message("Unable to create wallet",
-                    "error encountered while creating wallet", walletDto));
-
-            return Ok(created);
-        }
 
         /// <summary>
-        /// Allows logged in Premium or Free account holders to delete their wallet
+        /// Allows logged in Premium account holders to delete their wallet
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -89,7 +52,7 @@ namespace WalletPlusIncAPI.Controllers
         }
 
         /// <summary>
-        /// Allows logged in Premium or Free account holders to update their wallet
+        /// Allows logged in Premium account holders to update their wallet
         /// </summary>
         /// <param name="walletDto"></param>
         /// <returns></returns>
@@ -317,9 +280,14 @@ namespace WalletPlusIncAPI.Controllers
         public async Task<IActionResult> GetPointWallet()
         {
             var result = await _walletService.GetPointWalletBalance();
+            if (result != null)
+            {
+                return Ok(ResponseMessage.Message($"your point balance is {result} ", null, result));
+            }
 
-            return Ok(ResponseMessage.Message($"your point balance is {result} ", null, result));
+            return BadRequest();
         }
+           
 
         /// <summary>
         /// Allows only Admin to get a particular wallet by its Id

@@ -53,7 +53,7 @@ namespace WalletPlusIncAPI.Controllers
             if (checkUser.Success)
                 return BadRequest(ResponseMessage.Message("User with the email already exist"));
 
-            var result = await _appUserService.SignUp(appUserRegisterDto, Url, Request.Scheme);
+            var result = await _appUserService.SignUp(appUserRegisterDto);
             if (!result.Success)
             {
                 return BadRequest(ResponseMessage.Message("Unable to register User"));
