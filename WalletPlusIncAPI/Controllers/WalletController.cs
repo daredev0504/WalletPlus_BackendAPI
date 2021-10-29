@@ -183,17 +183,16 @@ namespace WalletPlusIncAPI.Controllers
             if (result.Data == null)
                 return NotFound(ResponseMessage.Message("User Not found", "user id provided is invalid", fundingDto));
 
-            var wallet = _walletService.GetFiatWalletById(fundingDto.WalletOwnerId);
+            var wallet = await _walletService.GetFiatWalletById(fundingDto.WalletOwnerId);
            
 
-            if (wallet.Data == null)
+            if (wallet == null)
                 return NotFound(ResponseMessage.Message("Wallet not found", "user does not have a wallet", fundingDto));
 
-            //var freeWalletFunded = await _walletRepository.FundNoobWallet(fundingDto);
-            var freeWalletFunded = await _fundsService.CreateFunding(fundingDto, wallet.Data.Id);
+            var freeWalletFunded = await _fundsService.CreateFunding(fundingDto, wallet.Id);
 
             if (!freeWalletFunded)
-                return BadRequest(ResponseMessage.Message("Unable to fund wallet", "An error was encountered while trying to fund the wallet", fundingDto));
+                return BadRequest(ResponseMessage.Message("Unable to fund wallet", $"this wallet has a limit of {LimitCalc.LimitForDeposit}", fundingDto));
 
             return Ok(ResponseMessage.Message("Successfully funded, waiting approval from an Admin", null, fundingDto));
         }
@@ -259,7 +258,6 @@ namespace WalletPlusIncAPI.Controllers
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> WithdrawFromWallet(WithdrawalDto withdrawalDto)
         {
-
             var currencyExist = await _currencyService.CurrencyExist(withdrawalDto.CurrencyId);
 
             if (!currencyExist.Success)
@@ -281,11 +279,11 @@ namespace WalletPlusIncAPI.Controllers
             if (!walletDebited.Success)
                 return BadRequest(ResponseMessage.Message("Unable to withdraw from wallet", "An error was encountered while trying to withdraw from the wallet", withdrawalDto));
 
-            return Ok(ResponseMessage.Message("You have successfully debited the walled", null, withdrawalDto));
+            return Ok(walletDebited);
         }
 
         /// <summary>
-        /// Allows Free or Premium account holder to get all their wallet(s)
+        /// Allows Premium account holder to get all their wallet(s)
         /// </summary>
         /// <returns></returns>
         [Authorize(Roles = "Premium")]
@@ -295,6 +293,32 @@ namespace WalletPlusIncAPI.Controllers
             var myWallets = _walletService.GetAllMyWallets();
 
             return Ok(ResponseMessage.Message("List of all wallets you own", null, myWallets));
+        }
+
+        /// <summary>
+        /// get your money wallet balance
+        /// </summary>
+        /// <returns></returns>
+        [Authorize(Roles = "Premium")]
+        [HttpGet("fiatBalance")]
+        public async Task<IActionResult> GetFiatWalletBalance()
+        {
+            var result = await _walletService.GetFiatWalletBalance();
+
+            return Ok(ResponseMessage.Message($"your point balance is {result} ", null, result));
+        }
+
+        /// <summary>
+        ///  get your point wallet balance
+        /// </summary>
+        /// <returns></returns>
+        [Authorize(Roles = "Premium")]
+        [HttpGet("pointBalance")]
+        public async Task<IActionResult> GetPointWallet()
+        {
+            var result = await _walletService.GetPointWalletBalance();
+
+            return Ok(ResponseMessage.Message($"your point balance is {result} ", null, result));
         }
 
         /// <summary>

@@ -207,7 +207,19 @@
         </member>
         <member name="M:WalletPlusIncAPI.Controllers.WalletController.GetAllMyWallets">
             <summary>
-            Allows Free or Premium account holder to get all their wallet(s)
+            Allows Premium account holder to get all their wallet(s)
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.WalletController.GetFiatWalletBalance">
+            <summary>
+            get your money wallet balance
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.WalletController.GetPointWallet">
+            <summary>
+             get your point wallet balance
             </summary>
             <returns></returns>
         </member>

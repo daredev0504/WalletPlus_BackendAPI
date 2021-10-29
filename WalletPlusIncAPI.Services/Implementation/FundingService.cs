@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using WalletPlusIncAPI.Data.DataAccess.Interfaces;
+using WalletPlusIncAPI.Helpers;
 using WalletPlusIncAPI.Models.Dtos.Funding;
 using WalletPlusIncAPI.Models.Dtos.Wallet;
 using WalletPlusIncAPI.Models.Entities;
@@ -34,44 +35,56 @@ namespace WalletPlusIncAPI.Services.Implementation
 
         public async Task<bool> CreateFunding(FundPremiumDto fundFreeDto, Guid walletId)
         {
-            Funding funding = new Funding()
+            var userId = _walletService.GetUserId();
+            var wallet  = await _walletService.GetFiatWalletById(userId);
+            var result = WalletReachLimit(fundFreeDto.Amount, wallet.Balance);
+            if (result)
             {
-                DestinationId = walletId,
-                CurrencyId = fundFreeDto.CurrencyId,
-                Amount = fundFreeDto.Amount,
-                IsApproved = false
-            };
+                Funding funding = new Funding()
+                {
+                    DestinationId = walletId,
+                    CurrencyId = fundFreeDto.CurrencyId,
+                    Amount = fundFreeDto.Amount,
+                    IsApproved = false
+                };
 
-            try
-            {
-              await _fundingRepository.Add(funding);
+                try
+                {
+                
+                    if ( await _fundingRepository.Add(funding))
+                    {
+                    
+                        if (fundFreeDto.Amount >= 5000 && fundFreeDto.Amount <= 10000)
+                        {
+                            int points  = (int) ((PercentagesCalc.PointOne / 100) * (double) fundFreeDto.Amount);
 
-              if (fundFreeDto.Amount >= 5000 && fundFreeDto.Amount <= 10000)
-              {
-                  var percentage = 1;
-                  int points  = (int) ((percentage / 100) * fundFreeDto.Amount);
+                            await _walletService.AwardPremiumWalletPoint(points);
+                        }
 
-                  await _walletService.AwardPremiumWalletPoint(points);
-              }
+                        if (fundFreeDto.Amount >= 10001 && fundFreeDto.Amount <= 25000)
+                        {
+                            int points = (int)Math.Round((PercentagesCalc.PointTwo/100) * (double) fundFreeDto.Amount);
+                            await _walletService.AwardPremiumWalletPoint(points);
+                        }
 
-              if (fundFreeDto.Amount >= 10001 && fundFreeDto.Amount <= 25000)
-              {
-                  int points = (int)Math.Round((2.5/100) * (double) fundFreeDto.Amount);
-                  await _walletService.AwardPremiumWalletPoint(points);
-              }
+                        if (fundFreeDto.Amount >= 25000)
+                        {
+                            int points = (int)Math.Round((decimal) (PercentagesCalc.PointThree/100)  * fundFreeDto.Amount);
+                            await _walletService.AwardPremiumWalletPoint(points);
+                        }
+                    }
+             
 
-              if (fundFreeDto.Amount >= 25000)
-              {
-                  int points = (int)Math.Round((decimal) (5/100)  * fundFreeDto.Amount);
-                  await _walletService.AwardPremiumWalletPoint(points);
-              }
-              return true;
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
             }
-            catch
-            {
-                return false;
-            }
-          
+
+            return false;
+
         }
 
         public async Task<bool> DeleteFunding(Guid id)
@@ -120,5 +133,6 @@ namespace WalletPlusIncAPI.Services.Implementation
             }
             return null;
         }
+        private bool WalletReachLimit(decimal deposit, decimal balance) => (deposit + balance) <= LimitCalc.LimitForDeposit; 
     }
 }

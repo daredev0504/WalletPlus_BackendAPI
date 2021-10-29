@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -7,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using WalletPlusIncAPI.Data.DataAccess.Interfaces;
+using WalletPlusIncAPI.Helpers;
 using WalletPlusIncAPI.Helpers.Rates;
 using WalletPlusIncAPI.Models.Dtos.Wallet;
 using WalletPlusIncAPI.Models.Entities;
@@ -203,38 +206,21 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-        public ServiceResponse<Wallet> GetFiatWalletById(string userId)
+        public async Task<Wallet> GetFiatWalletById(string userId)
         {
-            var response = new ServiceResponse<Wallet>();
-            var wallet = _walletRepository.GetFiatWalletById(userId);
+            var wallet = await _walletRepository.GetFiatWalletById(userId);
             //var walletReaddto = _mapper.Map<WalletReadDto>(wallet);
-            if (wallet != null)
-            {
-                response.Message = "Fiat wallet returned";
-                response.Data = wallet;
-                response.Success = true;
-                return response;
-            }
-            response.Message = "Fiat wallet not found";
-            response.Success = false;
-            return response;
+          
+                return wallet;
+            
         }
 
-        public ServiceResponse<Wallet> GetPointWalletById(string userId)
+        public async Task<Wallet> GetPointWalletById(string userId)
         {
-            var response = new ServiceResponse<Wallet>();
-            var wallet = _walletRepository.GetPointWalletById(userId);
+            var wallet = await _walletRepository.GetPointWalletById(userId);
             //var walletReaddto = _mapper.Map<WalletReadDto>(wallet);
-            if (wallet != null)
-            {
-                response.Message = "Point wallet returned";
-                response.Success = true;
-                response.Data = wallet;
-                return response;
-            }
-            response.Message = "Point wallet not found";
-            response.Success = false;
-            return response;
+           
+            return wallet;
         }
 
 
@@ -282,7 +268,8 @@ namespace WalletPlusIncAPI.Services.Implementation
             {
                 var walletsRead = _mapper.Map<IEnumerable<WalletReadDto>>(wallets);
 
-                response.Message = "main wallet returned";
+                response.Message = "all wallets returned";
+                response.Data = walletsRead.ToList();
                 response.Success = true;
                 return response;
             }
@@ -384,7 +371,7 @@ namespace WalletPlusIncAPI.Services.Implementation
                 var receiver = await _userManager.FindByNameAsync(fundOthersDto.Username);
                 if (receiver != null)
                 {
-                    var receiverFiatWallet = _walletRepository.GetFiatWalletById(receiver.Id);
+                    var receiverFiatWallet = await GetFiatWalletById(receiver.Id);
                     await WithdrawFromWalletInstant(fundOthersDto.Amount);
                     await FundWallet(receiverFiatWallet, fundOthersDto.Amount);
                     response.Message = "wallet funded";
@@ -493,25 +480,13 @@ namespace WalletPlusIncAPI.Services.Implementation
         {
             var response = new ServiceResponse<bool>();
             var userId = GetUserId();
-            var wallet  = GetPointWalletById(userId);
+            var wallet  = await GetPointWalletById(userId);
 
-            if ( CanAddMorePointToWallet(wallet.Data.Balance))
+            if ( CanAddMorePointToWallet(wallet.Balance))
             {
-                wallet.Data.Balance += point;
+                wallet.Balance += point;
 
-                //Wallet walletD = new Wallet()
-                //{
-                //    Id = wallet.Data.Id,
-                //    OwnerId = wallet.Data.OwnerId,
-                //    WalletType = wallet.Data.WalletType,
-                //    Balance = wallet.Data.Balance,
-                //    CurrencyId = wallet.Data.CurrencyId,
-                //    IsMain = wallet.Data.IsMain,
-                //    Created_at = DateTime.Now
-
-
-                //};
-                await UpdateWallet(wallet.Data);
+                await UpdateWallet(wallet);
 
                 response.Success = true;
                 response.Data = true;
@@ -527,18 +502,18 @@ namespace WalletPlusIncAPI.Services.Implementation
         }
 
         public bool CanWithdrawFromWallet(decimal balance, decimal? amount) => (balance - amount) >= 0;
-        private bool CanAddMorePointToWallet(decimal balance) => (balance) <= 5000;
+        private bool CanAddMorePointToWallet(decimal balance) => (balance) <= LimitCalc.LimitForPoint;
+
 
         public async Task WithdrawFromWalletInstant(decimal amount)
         {
-            var userId = GetUserId();
-            var wallet  = GetFiatWalletById(userId);
+            var wallet  = await GetFiatWalletById(GetUserId());
 
-            wallet.Data.Balance -= amount;
-            await _transactionService.CreateTransaction(TransactionType.Debit, amount,wallet.Data.Id,
-                wallet.Data.CurrencyId);
+            wallet.Balance -= amount;
+            await _transactionService.CreateTransaction(TransactionType.Debit, amount,wallet.Id,
+                wallet.CurrencyId);
 
-            await UpdateWallet(wallet.Data);
+            await UpdateWallet(wallet);
         }
 
         public async Task<ServiceResponse<bool>> WithdrawFromWallet(WithdrawalDto withdrawalDto)
@@ -637,6 +612,18 @@ namespace WalletPlusIncAPI.Services.Implementation
             response.Message = "Main wallet changed";
 
             return response;
+        }
+
+        public async Task<string> GetFiatWalletBalance()
+        {
+            var wallet = await GetFiatWalletById(GetUserId());
+            return wallet.Balance.ToString(CultureInfo.InvariantCulture);
+        }
+
+        public async Task<string> GetPointWalletBalance()
+        {
+            var wallet = await GetPointWalletById(GetUserId());
+            return wallet.Balance.ToString(CultureInfo.InvariantCulture);
         }
     }
 }

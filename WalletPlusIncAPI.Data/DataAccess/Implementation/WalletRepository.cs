@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using WalletPlusIncAPI.Data.Data;
@@ -35,8 +36,8 @@ namespace WalletPlusIncAPI.Data.DataAccess.Implementation
 
           public List<Wallet> GetWalletsById(Guid id) => _context.Wallets.Include(w => w.Currency).Where(w => w.Id == id).ToList();
          public Wallet GetWalletById(Guid? id) => _context.Wallets.Where(w => w.WalletType == WalletType.Fiat).Include(w => w.Currency).FirstOrDefault(w => w.Id == id);
-          public Wallet GetFiatWalletById(string userId) => _context.Wallets.Where(w => w.WalletType == WalletType.Fiat).Include(w => w.Currency).FirstOrDefault(w => w.OwnerId == userId);
-          public Wallet GetPointWalletById(string userId) => _context.Wallets.Where(w => w.WalletType == WalletType.Point).Include(w => w.Currency).FirstOrDefault(w => w.OwnerId == userId);
+          public async Task<Wallet> GetFiatWalletById(string userId) => await _context.Wallets.Where(w => w.WalletType == WalletType.Fiat).Include(w => w.Currency).FirstOrDefaultAsync(w => w.OwnerId == userId);
+          public async Task<Wallet> GetPointWalletById(string userId) => await _context.Wallets.Where(w => w.WalletType == WalletType.Point).Include(w => w.Currency).FirstOrDefaultAsync(w => w.OwnerId == userId);
 
         public List<Wallet> GetWalletsByUserId(string ownerId) => _context.Wallets.Where(w => w.OwnerId == ownerId).ToList();
 

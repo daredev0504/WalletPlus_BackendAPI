@@ -9,12 +9,12 @@ namespace WalletPlusIncAPI.Filters
     {
         public void OnActionExecuting(ActionExecutingContext context)
         {
-            var param = context.ActionArguments.SingleOrDefault(p => p.Value is IEntityType);
-            if(param.Value == null)
-            {
-                context.Result = new BadRequestObjectResult("Object is null");
-                return;
-            }
+            //var param = context.ActionArguments.SingleOrDefault(p => p.Value is IEntityType);
+            //if(param.Value == null)
+            //{
+            //    context.Result = new BadRequestObjectResult("Object is null");
+            //    return;
+            //}
             
             if(!context.ModelState.IsValid)
             {

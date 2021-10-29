@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using WalletPlusIncAPI.Models.Dtos.Wallet;
 using WalletPlusIncAPI.Models.Entities;
 
@@ -23,8 +24,8 @@ namespace WalletPlusIncAPI.Data.DataAccess.Interfaces
 
         List<Wallet> GetWalletsByUserId(string ownerId);
 
-        Wallet GetFiatWalletById(string userId);
-        Wallet GetPointWalletById(string userId);
+        Task<Wallet> GetFiatWalletById(string userId);
+        Task<Wallet> GetPointWalletById(string userId);
 
         Wallet GetUserMainCurrencyWallet(string userId);
 

@@ -19,8 +19,10 @@ namespace WalletPlusIncAPI.Services.Interfaces
         ServiceResponse<List<WalletReadDto>> GetAllMyWallets();
 
         ServiceResponse<Wallet> GetWalletById(Guid? id);
-        ServiceResponse<Wallet> GetFiatWalletById(string userId);
-        ServiceResponse<Wallet> GetPointWalletById(string userId);
+        Task<Wallet> GetFiatWalletById(string userId);
+        Task<string>GetFiatWalletBalance();
+        Task<string>GetPointWalletBalance();
+        Task<Wallet> GetPointWalletById(string userId);
 
         ServiceResponse<List<Wallet>> GetWalletsById(Guid id);
 
