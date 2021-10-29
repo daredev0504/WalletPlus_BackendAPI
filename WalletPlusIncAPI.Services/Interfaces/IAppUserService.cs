@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using WalletPlusIncAPI.Helpers.RequestFeatures;
 using WalletPlusIncAPI.Models.Dtos.AppUser;
 using WalletPlusIncAPI.Models.Entities;
-using WalletPlusIncAPI.Services.AuthManager;
 
 namespace WalletPlusIncAPI.Services.Interfaces
 {

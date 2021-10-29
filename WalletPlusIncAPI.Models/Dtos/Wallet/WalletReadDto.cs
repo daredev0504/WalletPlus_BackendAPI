@@ -8,8 +8,8 @@ namespace WalletPlusIncAPI.Models.Dtos.Wallet
         public Guid Id { get; set; }
 
         public string CurrencyCode { get; set; }
-        public string CurrencyId { get; set; }
-
+        public int CurrencyId { get; set; }
+        public string Type { get; set; }
         public decimal Balance { get; set; }
 
         public string OwnerId { get; set; }

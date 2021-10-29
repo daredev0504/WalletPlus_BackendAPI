@@ -23,6 +23,9 @@ namespace WalletPlusIncAPI.Data.DataAccess.Interfaces
 
         List<Wallet> GetWalletsByUserId(string ownerId);
 
+        Wallet GetFiatWalletById(string userId);
+        Wallet GetPointWalletById(string userId);
+
         Wallet GetUserMainCurrencyWallet(string userId);
 
         bool UserHasWalletWithCurrency(FundingDto fundingDto);

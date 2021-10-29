@@ -10,7 +10,7 @@ using WalletPlusIncAPI.Data.Data;
 namespace WalletPlusIncAPI.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211027155342_init")]
+    [Migration("20211028001143_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -205,12 +205,6 @@ namespace WalletPlusIncAPI.Data.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
-                    b.Property<string>("OauthIssuer")
-                        .HasColumnType("text");
-
-                    b.Property<string>("OauthSubject")
-                        .HasColumnType("text");
-
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
 
@@ -358,8 +352,9 @@ namespace WalletPlusIncAPI.Data.Migrations
                     b.Property<DateTime>("Updated_at")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("WalletType")
-                        .HasColumnType("integer");
+                    b.Property<string>("WalletType")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

@@ -12,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using WalletPlusIncAPI.Helpers.RequestFeatures;
 using WalletPlusIncAPI.Models.Dtos.AppUser;
 using WalletPlusIncAPI.Models.Entities;
-using WalletPlusIncAPI.Services.AuthManager;
 using WalletPlusIncAPI.Services.Interfaces;
 
 namespace WalletPlusIncAPI.Services.Implementation
@@ -57,7 +56,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             {
                
 
-                await _userManager.AddToRoleAsync(domainAppUser, "Free");
+                await _userManager.AddToRoleAsync(domainAppUser, "Premium");
                 var domainAppReadUser = _mapper.Map<AppUserReadDto>(domainAppUser);
 
                 Wallet wallet = new Wallet()
@@ -65,10 +64,20 @@ namespace WalletPlusIncAPI.Services.Implementation
                     Balance = 0,
                     CurrencyId = model.MainCurrencyId,
                     IsMain = true,
+                    WalletType = WalletType.Fiat,
+                    OwnerId = domainAppReadUser.Id
+                };
+                Wallet wallet2 = new Wallet()
+                {
+                    Balance = 0,
+                    CurrencyId = model.MainCurrencyId,
+                    IsMain = true,
+                    WalletType = WalletType.Point,
                     OwnerId = domainAppReadUser.Id
                 };
 
                 await _walletService.AddWallet(wallet);
+                await _walletService.AddWallet(wallet2);
                 //await _emailSender.SendEmailAsync(message);
 
                 response.Message = "user created successfully";

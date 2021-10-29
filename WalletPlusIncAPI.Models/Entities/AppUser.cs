@@ -19,9 +19,7 @@ namespace WalletPlusIncAPI.Models.Entities
         public string PublicId { get; set; }
         public bool IsActive { get; set; } = true;
         public DateTime Created_at { get; set; }
-        public string OauthSubject { get; set; }
-        public string OauthIssuer { get; set; }
-        
+
 
         //Navigational Properties
 

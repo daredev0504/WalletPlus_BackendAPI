@@ -26,7 +26,10 @@ namespace WalletPlusIncAPI.Data.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            
+            modelBuilder.Entity<Transaction>()
+                .Property(s => s.Type)
+                .HasConversion<string>();
+
             modelBuilder.Entity<Transaction>()
                 .HasOne(e => e.Wallet)
                 .WithMany(e => e.Transactions)
@@ -38,6 +41,10 @@ namespace WalletPlusIncAPI.Data.Data
                 .WithMany(e => e.Wallets)
                 .HasForeignKey(e => e.OwnerId)
                 .OnDelete(DeleteBehavior.ClientCascade);
+
+            modelBuilder.Entity<Wallet>()
+                .Property(s => s.WalletType)
+                .HasConversion<string>();
 
             //modelBuilder.Entity<Followers>()
             //    .HasNoKey();

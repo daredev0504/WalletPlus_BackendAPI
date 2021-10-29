@@ -4,6 +4,51 @@
         <name>WalletPlusIncAPI</name>
     </assembly>
     <members>
+        <member name="T:WalletPlusIncAPI.Controllers.AdminController">
+             <summary>
+            
+             </summary>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.AdminController.GetAllUsers(WalletPlusIncAPI.Helpers.RequestFeatures.AppUserParameters)">
+            <summary>
+            Allows admins to get all User details
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.AdminController.GetAllWallets">
+            <summary>
+            Allows only admins to get wallet infos
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.AdminController.GetUnApprovedFundings">
+            <summary>
+            Allows an admin to get all free funds yet to be approved
+            </summary>
+            <returns>Admin Route</returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.AdminController.ChangeUserMainCurrency(WalletPlusIncAPI.Models.Dtos.Currency.ChangeMainCurrencyDto)">
+            <summary>
+            Admin can change the main currency of a User
+            </summary>
+            <param name="changeMainCurrencyDto"></param>
+            <returns>Response</returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.AdminController.ChangeUserAccountType(System.String,WalletPlusIncAPI.Models.Dtos.AppUser.ChangeUserAccountTypeDto)">
+            <summary>
+            Admin can Promote or demote an account type
+            </summary>
+            <param name="userId"></param>
+            <param name="changeUserAccountTypeDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.AdminController.ApproveFunding(WalletPlusIncAPI.Models.Dtos.Funding.ApproveFundingDto)">
+            <summary>
+            Admin can approve the funding of a Free account holder
+            </summary>
+            <param name="approveFundingDto"></param>
+            <returns></returns>
+        </member>
         <member name="M:WalletPlusIncAPI.Controllers.AuthController.SignUp(WalletPlusIncAPI.Models.Dtos.AppUser.AppUserRegisterDto)">
             <summary>
             Registers a new user automatically creating a main wallet for the user.
@@ -43,6 +88,134 @@
             <summary>
             Allows any logged in user to get his/her account details
             </summary>
+            <returns></returns>
+        </member>
+        <member name="T:WalletPlusIncAPI.Controllers.CurrencyController">
+             <summary>
+            
+             </summary>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.CurrencyController.#ctor(WalletPlusIncAPI.Services.Interfaces.ICurrencyService,AutoMapper.IMapper)">
+            <summary>
+            
+            </summary>
+            <param name="currencyService"></param>
+            <param name="mapper"></param>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.CurrencyController.GetAllCurrencies">
+            <summary>
+            Get all country codes
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:WalletPlusIncAPI.Controllers.TransactionController">
+             <summary>
+            
+             </summary>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.TransactionController.#ctor(WalletPlusIncAPI.Services.Interfaces.ITransactionService)">
+            <summary>
+            
+            </summary>
+            <param name="transactionService"></param>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.TransactionController.GetMyTransaction">
+            <summary>
+            Allows only logged-in Premium and Free account holders to get all transactions made on every of their wallet
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.TransactionController.GetWalletTransaction(System.Guid)">
+            <summary>
+            Get transactions from a specific wallet
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.TransactionController.GetWalletCreditTransaction(System.Guid)">
+            <summary>
+            get credit transactions
+            </summary>
+            <param name="walletId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.TransactionController.GetWalletDebitTransaction(System.Guid)">
+            <summary>
+            get debit transactions
+            </summary>
+            <param name="walletId"></param>
+            <returns></returns>
+        </member>
+        <member name="T:WalletPlusIncAPI.Controllers.WalletController">
+            <summary>
+            Controller
+            </summary>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.WalletController.CreateWallet(WalletPlusIncAPI.Models.Dtos.Wallet.WalletCreateDto)">
+            <summary>
+            Allows logged in Premium or Free account holders to create a wallet
+            </summary>
+            <param name="walletDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.WalletController.DeleteWallet(System.Guid)">
+            <summary>
+            Allows logged in Premium or Free account holders to delete their wallet
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.WalletController.UpdateWallet(WalletPlusIncAPI.Models.Dtos.Wallet.WalletUpdateDto)">
+            <summary>
+            Allows logged in Premium or Free account holders to update their wallet
+            </summary>
+            <param name="walletDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.WalletController.GetWallet(System.Guid)">
+            <summary>
+            Allows logged-in Admin account holders to get a wallet by its Id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.WalletController.FundOthersWallet(WalletPlusIncAPI.Models.Dtos.Wallet.FundOthersDto)">
+            <summary>
+            send funds to other registered users
+            </summary>
+            <param name="fundingDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.WalletController.FundPremiumWallet(WalletPlusIncAPI.Models.Dtos.Wallet.FundPremiumDto)">
+            <summary>
+            Allows Premium users to fund a wallet
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.WalletController.FundWallet(WalletPlusIncAPI.Models.Dtos.Wallet.FundingDto)">
+            <summary>
+            Allows Admins/Premium users to fund a wallet
+            </summary>
+            <param name="fundingDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.WalletController.WithdrawFromWallet(WalletPlusIncAPI.Models.Dtos.Wallet.WithdrawalDto)">
+            <summary>
+            Allows Premium account holder to debit their wallets
+            </summary>
+            <param name="withdrawalDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.WalletController.GetAllMyWallets">
+            <summary>
+            Allows Free or Premium account holder to get all their wallet(s)
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.WalletController.GetWalletsByUserId(System.String)">
+            <summary>
+            Allows only Admin to get a particular wallet by its Id
+            </summary>
+            <param name="id"></param>
             <returns></returns>
         </member>
     </members>

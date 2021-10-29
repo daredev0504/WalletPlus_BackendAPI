@@ -19,6 +19,8 @@ namespace WalletPlusIncAPI.Services.Interfaces
         ServiceResponse<List<WalletReadDto>> GetAllMyWallets();
 
         ServiceResponse<Wallet> GetWalletById(Guid? id);
+        ServiceResponse<Wallet> GetFiatWalletById(string userId);
+        ServiceResponse<Wallet> GetPointWalletById(string userId);
 
         ServiceResponse<List<Wallet>> GetWalletsById(Guid id);
 
@@ -29,13 +31,16 @@ namespace WalletPlusIncAPI.Services.Interfaces
         ServiceResponse<List<WalletReadDto>> GetAllWallets();
         Task<ServiceResponse<bool>> FundWallet(Wallet wallet, decimal amount);
         Task<ServiceResponse<bool>> FundWallet(Wallet main, Wallet source);
-        Task<ServiceResponse<bool>> FundFreeWallet(Funding funding);
-
+        Task<ServiceResponse<bool>> FundPremiumWallet(Funding funding);
+        Task<ServiceResponse<bool>> FundOthers(FundOthersDto fundOthersDto);
+        Task<ServiceResponse<bool>> AwardPremiumWalletPoint(decimal point);
+        
         bool CanWithdrawFromWallet(decimal balance, decimal? amount);
 
         Task<ServiceResponse<bool>> WithdrawFromWallet(WithdrawalDto withdrawalDto);
         Task<ServiceResponse<bool>> WithdrawFromMain(string userId, decimal amount);
-        
+
+        Task WithdrawFromWalletInstant(decimal amount);
         Task<ServiceResponse<bool>> ChangeMainCurrency(Wallet oldWallet, Wallet newWallet);
 
         ServiceResponse<bool> UserHasWalletWithCurrency(FundingDto fundingDto);

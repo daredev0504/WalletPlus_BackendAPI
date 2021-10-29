@@ -43,8 +43,12 @@ namespace WalletPlusIncAPI.Profiles
            
 
             //Wallet
-            CreateMap<Wallet, WalletReadDto>();
-            CreateMap<WalletReadDto, Wallet>();
+            CreateMap<Wallet, WalletReadDto>()
+                .ForMember(c => c.Type, opt => 
+                    opt.MapFrom(d => d.WalletType.ToString()));
+            CreateMap<WalletReadDto, Wallet>()
+                .ForMember(c => c.WalletType, opt => 
+                    opt.MapFrom(d => d.Type));
             CreateMap<WalletCreateDto, Wallet>();
             CreateMap<Wallet, WalletCreateDto>();
             CreateMap<WalletUpdateDto,Wallet>();

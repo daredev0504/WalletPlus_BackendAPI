@@ -11,7 +11,7 @@ namespace WalletPlusIncAPI.Services.Interfaces
     {
         Funding GetFundingById(Guid id);
 
-        Task<bool> CreateFunding(FundFreeDto fundFreeDto, Guid walletId);
+        Task<bool> CreateFunding(FundPremiumDto fundFreeDto, Guid walletId);
 
         Task<bool> DeleteFunding(Guid id);
 

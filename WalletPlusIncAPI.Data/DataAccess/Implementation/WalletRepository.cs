@@ -31,9 +31,12 @@ namespace WalletPlusIncAPI.Data.DataAccess.Implementation
 
         public List<Wallet> GetAllMyWallets() => _context.Wallets.Include(w => w.Currency).Where(w => w.OwnerId == GetUserId()).ToList();
 
-        public Wallet GetWalletById(Guid? id) => _context.Wallets.Include(w => w.Currency).FirstOrDefault(w => w.Id == id);
+        //public Wallet GetWalletById(Guid? id) => _context.Wallets.Include(w => w.Currency).FirstOrDefault(w => w.Id == id);
 
-        public List<Wallet> GetWalletsById(Guid id) => _context.Wallets.Include(w => w.Currency).Where(w => w.Id == id).ToList();
+          public List<Wallet> GetWalletsById(Guid id) => _context.Wallets.Include(w => w.Currency).Where(w => w.Id == id).ToList();
+         public Wallet GetWalletById(Guid? id) => _context.Wallets.Where(w => w.WalletType == WalletType.Fiat).Include(w => w.Currency).FirstOrDefault(w => w.Id == id);
+          public Wallet GetFiatWalletById(string userId) => _context.Wallets.Where(w => w.WalletType == WalletType.Fiat).Include(w => w.Currency).FirstOrDefault(w => w.OwnerId == userId);
+          public Wallet GetPointWalletById(string userId) => _context.Wallets.Where(w => w.WalletType == WalletType.Point).Include(w => w.Currency).FirstOrDefault(w => w.OwnerId == userId);
 
         public List<Wallet> GetWalletsByUserId(string ownerId) => _context.Wallets.Where(w => w.OwnerId == ownerId).ToList();
 

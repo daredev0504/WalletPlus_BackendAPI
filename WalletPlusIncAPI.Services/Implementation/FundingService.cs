@@ -14,11 +14,13 @@ namespace WalletPlusIncAPI.Services.Implementation
     {
         private readonly IFundRepository _fundingRepository;
         private readonly IMapper _iMapper;
+        private readonly IWalletService _walletService;
 
-        public FundingService(IFundRepository fundingRepository, IMapper iMapper)
+        public FundingService(IFundRepository fundingRepository, IMapper iMapper, IWalletService walletService)
         {
             _fundingRepository = fundingRepository;
             _iMapper = iMapper;
+            _walletService = walletService;
         }
 
 
@@ -30,7 +32,7 @@ namespace WalletPlusIncAPI.Services.Implementation
         }
 
 
-        public async Task<bool> CreateFunding(FundFreeDto fundFreeDto, Guid walletId)
+        public async Task<bool> CreateFunding(FundPremiumDto fundFreeDto, Guid walletId)
         {
             Funding funding = new Funding()
             {
@@ -43,7 +45,27 @@ namespace WalletPlusIncAPI.Services.Implementation
             try
             {
               await _fundingRepository.Add(funding);
-                return true;
+
+              if (fundFreeDto.Amount >= 5000 && fundFreeDto.Amount <= 10000)
+              {
+                  var percentage = 1;
+                  int points  = (int) ((percentage / 100) * fundFreeDto.Amount);
+
+                  await _walletService.AwardPremiumWalletPoint(points);
+              }
+
+              if (fundFreeDto.Amount >= 10001 && fundFreeDto.Amount <= 25000)
+              {
+                  int points = (int)Math.Round((2.5/100) * (double) fundFreeDto.Amount);
+                  await _walletService.AwardPremiumWalletPoint(points);
+              }
+
+              if (fundFreeDto.Amount >= 25000)
+              {
+                  int points = (int)Math.Round((decimal) (5/100)  * fundFreeDto.Amount);
+                  await _walletService.AwardPremiumWalletPoint(points);
+              }
+              return true;
             }
             catch
             {

@@ -25,6 +25,7 @@ namespace WalletPlusIncAPI.Models.Entities
 
         [ForeignKey("OwnerId")]
         public AppUser Owner { get; set; }
+
         [Required]
         public WalletType WalletType { get; set; }
 
@@ -35,7 +36,7 @@ namespace WalletPlusIncAPI.Models.Entities
 
     public enum WalletType
     {
-        Point,
+        Point = 0,
         Fiat
     }
 }
