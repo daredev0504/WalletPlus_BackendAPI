@@ -78,7 +78,10 @@ namespace WalletPlusIncAPI.Controllers
         public async Task<IActionResult> GetWalletDebitTransaction(Guid walletId)
         {
             var transactions = await _transactionService.GetWalletTransactionsByDebit(walletId);
+            //if ()
+            //{
 
+            //}
             return Ok(ResponseMessage.Message("List of all debit transactions in this wallet", null, transactions));
         }
     }

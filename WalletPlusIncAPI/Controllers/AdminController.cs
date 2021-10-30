@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WalletPlusIncAPI.Filters;
 using WalletPlusIncAPI.Helpers;
 using WalletPlusIncAPI.Helpers.RequestFeatures;
 using WalletPlusIncAPI.Models.Dtos.AppUser;
@@ -53,8 +54,11 @@ namespace WalletPlusIncAPI.Controllers
         public IActionResult GetAllWallets()
         {
             var allWallets = _walletService.GetAllWallets();
-
-            return Ok(ResponseMessage.Message("List of all wallets", null, allWallets.Data.ToList()));
+            if (allWallets.Success)
+            {
+                return Ok(ResponseMessage.Message("List of all wallets", null, allWallets.Data.ToList()));
+            }
+            return BadRequest(allWallets);
         }
 
         /// <summary>
@@ -66,8 +70,12 @@ namespace WalletPlusIncAPI.Controllers
         public IActionResult GetUnApprovedFundings()
         {
             var fundings = _fundingService.GetUnApprovedFundings();
+            if (fundings != null)
+            {
+                return Ok(ResponseMessage.Message("List of all Free fundings yet to be approved", null, fundings));
+            }
 
-            return Ok(ResponseMessage.Message("List of all Free fundings yet to be approved", null, fundings));
+            return BadRequest(ResponseMessage.Message("Error", "could not fetch the requested resource", null));
         }
 
         /// <summary>
@@ -77,25 +85,14 @@ namespace WalletPlusIncAPI.Controllers
         /// <returns>Response</returns>
         [Authorize(Roles = "Admin")]
         [HttpPost("changeUserMainCurrency")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> ChangeUserMainCurrency(ChangeMainCurrencyDto changeMainCurrencyDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ResponseMessage.Message("Invalid Model", ModelState));
+            var result = await _walletService.ChangeMainCurrency(changeMainCurrencyDto);
+            if (!result.Success)
+                return BadRequest(result);
 
-            var old = _walletService.GetWalletById(changeMainCurrencyDto.OldMainCurrencyWalletId);
-            var @new = _walletService.GetWalletById(changeMainCurrencyDto.NewMainCurrencyWalletId);
-
-            if (old.Data == null || @new.Data == null)
-                return BadRequest(ResponseMessage.Message("one of the ids entered is incorrect", "wallet to found", changeMainCurrencyDto));
-
-            if (old.Data.OwnerId != @new.Data.OwnerId)
-                return BadRequest(ResponseMessage.Message("Wallets user do not match", "Wallets does not belong to the same user", changeMainCurrencyDto));
-
-            var changed = await _walletService.ChangeMainCurrency(old.Data, @new.Data);
-            if (!changed.Success)
-                return BadRequest(ResponseMessage.Message("Unable to change main currency", "error encountered while trying to save main currency", changeMainCurrencyDto));
-
-            return Ok(ResponseMessage.Message("Main currency changed successfully", null, changeMainCurrencyDto));
+            return Ok(result);
         }
 
        /// <summary>
@@ -106,16 +103,12 @@ namespace WalletPlusIncAPI.Controllers
        /// <returns></returns>
         [Authorize(Roles = "Admin")]
         [HttpPatch("change-role/{userId}")]
+       [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> ChangeUserAccountType(string userId, ChangeUserAccountTypeDto changeUserAccountTypeDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ResponseMessage.Message("Invalid Model", ModelState));
-
             var user =await _appUserService.GetUser(changeUserAccountTypeDto.UserId);
             if (user == null)
                 return BadRequest(ResponseMessage.Message("Invalid user Id", "user with the id was not found", changeUserAccountTypeDto));
-
-           
 
             var roles = await _appUserService.GetUserRoles(user.Data);
             var oldRole = roles.FirstOrDefault();
@@ -141,11 +134,9 @@ namespace WalletPlusIncAPI.Controllers
         /// <returns></returns>
         [Authorize(Roles = "Admin")]
         [HttpPost("approveFunding")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> ApproveFunding(ApproveFundingDto approveFundingDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ResponseMessage.Message("Invalid Model", ModelState));
-
             var funding = _fundingService.GetFundingById(approveFundingDto.FundingId);
             if (funding == null)
                 return BadRequest(ResponseMessage.Message("Invalid funding Id", "funding with the id was not found", approveFundingDto));
@@ -156,7 +147,7 @@ namespace WalletPlusIncAPI.Controllers
                 return BadRequest(ResponseMessage.Message("Invalid wallet Id", "wallet with the id was not found", approveFundingDto));
 
             var funded = await _walletService.FundPremiumWallet(funding);
-
+            
             if (!funded.Success)
                 return BadRequest(ResponseMessage.Message("Unable to fund account", "and error was encountered while trying to fund this account", approveFundingDto));
 

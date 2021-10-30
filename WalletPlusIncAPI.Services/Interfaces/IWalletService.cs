@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using WalletPlusIncAPI.Models.Dtos.Currency;
 using WalletPlusIncAPI.Models.Dtos.Wallet;
 using WalletPlusIncAPI.Models.Entities;
 
@@ -36,16 +37,13 @@ namespace WalletPlusIncAPI.Services.Interfaces
         Task<ServiceResponse<bool>> FundPremiumWallet(Funding funding);
         Task<ServiceResponse<bool>> FundOthers(FundOthersDto fundOthersDto);
         Task<ServiceResponse<bool>> AwardPremiumWalletPoint(decimal point);
-        
         bool CanWithdrawFromWallet(decimal balance, decimal? amount);
 
         Task<ServiceResponse<bool>> WithdrawFromWallet(WithdrawalDto withdrawalDto);
         Task<ServiceResponse<bool>> WithdrawFromMain(string userId, decimal amount);
 
         Task WithdrawFromWalletInstant(decimal amount);
-        Task<ServiceResponse<bool>> ChangeMainCurrency(Wallet oldWallet, Wallet newWallet);
-
-        ServiceResponse<bool> UserHasWalletWithCurrency(FundingDto fundingDto);
+        Task<ServiceResponse<bool>> ChangeMainCurrency(ChangeMainCurrencyDto changeMainCurrencyDto);
 
         ServiceResponse<List<Wallet>> GetUserWalletsByCurrencyId(string userId, int currencyId);
 

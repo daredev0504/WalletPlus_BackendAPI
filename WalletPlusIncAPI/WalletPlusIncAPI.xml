@@ -184,13 +184,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:WalletPlusIncAPI.Controllers.WalletController.FundWallet(WalletPlusIncAPI.Models.Dtos.Wallet.FundingDto)">
-            <summary>
-            Allows Admins/Premium users to fund a wallet
-            </summary>
-            <param name="fundingDto"></param>
-            <returns></returns>
-        </member>
         <member name="M:WalletPlusIncAPI.Controllers.WalletController.WithdrawFromWallet(WalletPlusIncAPI.Models.Dtos.Wallet.WithdrawalDto)">
             <summary>
             Allows Premium account holder to debit their wallets

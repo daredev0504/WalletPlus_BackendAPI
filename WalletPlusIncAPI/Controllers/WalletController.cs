@@ -106,23 +106,12 @@ namespace WalletPlusIncAPI.Controllers
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> FundOthersWallet(FundOthersDto fundingDto)
         {
-            var currencyExist = await _currencyService.CurrencyExist(fundingDto.CurrencyId);
+          
+            var result = await _walletService.FundOthers(fundingDto);
+            if (result.Success == false)
+                return BadRequest(result);
 
-            if (!currencyExist.Success)
-                return NotFound(ResponseMessage.Message("Currency Not found", "currency id provided is invalid", fundingDto));
-
-            var result = await _appUserService.GetUser(fundingDto.WalletOwnerId);
-
-            if (result.Data == null)
-                return NotFound(ResponseMessage.Message("User Not found", "user id provided is invalid", fundingDto));
-
-            //var freeWalletFunded = await _walletRepository.FundNoobWallet(fundingDto);
-            var WalletFunded = await _walletService.FundOthers(fundingDto);
-
-            if (WalletFunded.Data == false)
-                return BadRequest(ResponseMessage.Message("Unable to fund wallet", "An error was encountered while trying to fund the wallet", fundingDto));
-
-            return Ok(ResponseMessage.Message($"funds successfully sent to {fundingDto.Username}", null, fundingDto));
+            return Ok(result);
         }
 
 
@@ -160,57 +149,7 @@ namespace WalletPlusIncAPI.Controllers
             return Ok(ResponseMessage.Message("Successfully funded, waiting approval from an Admin", null, fundingDto));
         }
 
-        /// <summary>
-        /// Allows Admins/Premium users to fund a wallet
-        /// </summary>
-        /// <param name="fundingDto"></param>
-        /// <returns></returns>
-        [Authorize(Roles = "Premium, Admin")]
-        [HttpPost("fundWallet")]
-        [ServiceFilter(typeof(ValidationFilterAttribute))]
-        public async Task<IActionResult> FundWallet(FundingDto fundingDto)
-        {
-            
-            var currencyExist = await _currencyService.CurrencyExist(fundingDto.CurrencyId);
-
-            if (!currencyExist.Success)
-                return NotFound(ResponseMessage.Message("Currency Not found", "currency id provided is invalid", fundingDto));
-
-            var user = await _appUserService.GetUser(fundingDto.WalletOwnerId);
-
-            if (user.Data == null)
-                return NotFound(ResponseMessage.Message("User Not found", "user id provided is invalid", fundingDto));
-
-            //var userHasCurrency = _walletRepository.UserHasWalletWithCurrency(fundingDto);
-
-            var wallet = _walletService.GetUserWalletsByCurrencyId(fundingDto.WalletOwnerId, fundingDto.CurrencyId);
-
-            if (wallet.Data == null)
-            {
-                Wallet newWallet = new Wallet()
-                {
-                    Balance = fundingDto.Amount,
-                    CurrencyId = fundingDto.CurrencyId,
-                    IsMain = false,
-                    OwnerId = fundingDto.WalletOwnerId,
-                };
-
-                var walletCreated = await _walletService.AddWallet(newWallet);
-
-                if (!walletCreated.Success)
-                    return BadRequest(ResponseMessage.Message("Unable to fund wallet", "An error was encountered while trying to fund the wallet", fundingDto));
-
-                return Ok(ResponseMessage.Message("Wallet successfully created and funded", null, fundingDto));
-            }
-
-            var walletFunded = await _walletService.FundWallet(wallet.Data.FirstOrDefault(), fundingDto.Amount);
-
-            if (!walletFunded.Success)
-                return BadRequest(ResponseMessage.Message("Unable to fund wallet", "An error was encountered while trying to fund the wallet", fundingDto));
-
-            return Ok(ResponseMessage.Message("Wallet successfully funded", null, fundingDto));
-        }
-
+      
         /// <summary>
         /// Allows Premium account holder to debit their wallets
         /// </summary>
@@ -221,28 +160,12 @@ namespace WalletPlusIncAPI.Controllers
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> WithdrawFromWallet(WithdrawalDto withdrawalDto)
         {
-            var currencyExist = await _currencyService.CurrencyExist(withdrawalDto.CurrencyId);
+            var result = await _walletService.WithdrawFromWallet(withdrawalDto);
 
-            if (!currencyExist.Success)
-                return NotFound(ResponseMessage.Message("Currency Not found", "currency id provided is invalid", withdrawalDto));
+            if (!result.Success)
+                return BadRequest(result);
 
-            var walletExist = _walletService.CheckWallet(withdrawalDto.WalletId);
-
-            if (!walletExist.Success)
-                return NotFound(ResponseMessage.Message("Wallet Not found", "wallet id provided is invalid", withdrawalDto));
-
-            var loggedInUserId = _walletService.GetUserId();
-            var userWallets = _walletService.GetWalletsByUserId(loggedInUserId);
-
-            if (userWallets.Data.All(w => w.Id != withdrawalDto.WalletId))
-                return BadRequest(ResponseMessage.Message("Unable to withdraw from this wallet", "This wallet is not owned by you", withdrawalDto));
-
-            var walletDebited = await _walletService.WithdrawFromWallet(withdrawalDto);
-
-            if (!walletDebited.Success)
-                return BadRequest(ResponseMessage.Message("Unable to withdraw from wallet", "An error was encountered while trying to withdraw from the wallet", withdrawalDto));
-
-            return Ok(walletDebited);
+            return Ok(result);
         }
 
         /// <summary>
@@ -253,9 +176,12 @@ namespace WalletPlusIncAPI.Controllers
         [HttpGet("getAllMyWallets")]
         public IActionResult GetAllMyWallets()
         {
-            var myWallets = _walletService.GetAllMyWallets();
-
-            return Ok(ResponseMessage.Message("List of all wallets you own", null, myWallets));
+            var result = _walletService.GetAllMyWallets();
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+           return BadRequest(result);
         }
 
         /// <summary>

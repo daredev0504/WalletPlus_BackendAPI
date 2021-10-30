@@ -59,14 +59,40 @@ namespace WalletPlusIncAPI.Tests
         }
 
         [Fact]
-        public async Task teRFundWallet_If_Not_MeetLimitValidation()
+        public async Task Return_Notfound_FundWallet_If_Not_MeetLimitValidation()
         {
             MockUp(false);
             var walletController = new WalletController(_serviceProvider);
             var funding = new FundPremiumDto();
 
             //ACT
-            var actual = await walletController.FundPremiumWallet(funding) as OkObjectResult;
+            var actual = await walletController.FundPremiumWallet(funding) as NotFoundObjectResult;
+
+            //Assert
+            Assert.Equal(StatusCodes.Status404NotFound, actual.StatusCode);
+        }
+          [Fact]
+        public async Task Return_Ok_WithdrawWallet_If_MeetLimitValidation()
+        {
+            MockUp(true);
+            var walletController = new WalletController(_serviceProvider);
+            var withdraw = new WithdrawalDto();
+
+            //ACT
+            var actual = await walletController.WithdrawFromWallet(withdraw) as OkObjectResult;
+
+            //Assert
+            Assert.Equal(StatusCodes.Status200OK, actual.StatusCode);
+        }
+          [Fact]
+        public async Task Return_BadRequet_WithdrawWallet_If_Not_MeetLimitValidation()
+        {
+            MockUp(false);
+            var walletController = new WalletController(_serviceProvider);
+            var withdraw = new WithdrawalDto();
+
+            //ACT
+            var actual = await walletController.WithdrawFromWallet(withdraw) as BadRequestObjectResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status400BadRequest, actual.StatusCode);
@@ -84,6 +110,19 @@ namespace WalletPlusIncAPI.Tests
             //Assert
             Assert.Equal(StatusCodes.Status200OK, actual.StatusCode);
         }
+          [Fact]
+        public async Task FundOthers_ReturnOk_IfMeetLimitValidation()
+        {
+            MockUp(true);
+            var walletController = new WalletController(_serviceProvider);
+            var funding = new FundOthersDto();
+
+            //ACT
+            var actual = await walletController.FundOthersWallet(funding) as OkObjectResult;
+
+            //Assert
+            Assert.Equal(StatusCodes.Status200OK, actual.StatusCode);
+        }
         private void MockUp(bool state)
         {
             mockFundingService.Setup(service => service.CreateFunding(It.IsAny<FundPremiumDto>(), It.IsAny<Guid>())).
@@ -93,6 +132,10 @@ namespace WalletPlusIncAPI.Tests
                 .Returns(Task.FromResult(new ServiceResponse<AppUser>() {Success = state, Data = new AppUser()}));
             mockWalletService.Setup(service => service.GetFiatWalletById(It.IsAny<string>()))
                 .Returns(Task.FromResult(new Wallet()));
+             mockWalletService.Setup(service => service.WithdrawFromWallet(It.IsAny<WithdrawalDto>()))
+                .Returns(Task.FromResult(new ServiceResponse<bool>(){ Success = state }));
+              mockWalletService.Setup(service => service.FundOthers(It.IsAny<FundOthersDto>()))
+                .Returns(Task.FromResult(new ServiceResponse<bool>(){ Success = state }));
         }
     }
 }

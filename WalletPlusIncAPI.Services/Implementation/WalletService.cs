@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using WalletPlusIncAPI.Data.DataAccess.Interfaces;
 using WalletPlusIncAPI.Helpers;
 using WalletPlusIncAPI.Helpers.Rates;
+using WalletPlusIncAPI.Models.Dtos.Currency;
 using WalletPlusIncAPI.Models.Dtos.Wallet;
 using WalletPlusIncAPI.Models.Entities;
 using WalletPlusIncAPI.Services.Interfaces;
@@ -277,24 +278,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-        public ServiceResponse<bool> UserHasWalletWithCurrency(FundingDto fundingDto)
-        {
-            var response = new ServiceResponse<bool>();
-            var wallet = _walletRepository.UserHasWalletWithCurrency(fundingDto);
-           
-            if (wallet)
-            {
-                response.Message = "main wallet returned";
-                response.Success = true;
-                return response;
-            }
-            response.Message = "main wallet not found";
-            response.Success = false;
-            return response;
-           
-        }
-
-        
+     
         public ServiceResponse<List<Wallet>> GetUserWalletsByCurrencyId(string userId, int currencyId)
         {
             var response = new ServiceResponse<List<Wallet>>();
@@ -357,6 +341,16 @@ namespace WalletPlusIncAPI.Services.Implementation
         public async Task<ServiceResponse<bool>> FundOthers(FundOthersDto fundOthersDto)
         {
             var response = new ServiceResponse<bool>();
+               var currencyExist = await _currencyService.CurrencyExist(fundOthersDto.CurrencyId);
+
+            if (!currencyExist.Success)
+            {
+                response.Data = false;
+                response.Success = false;
+                response.Message = "Currency Not found, currency id provided is invalid";
+                  return response;
+            }
+
             var sender = await _userManager.FindByIdAsync(fundOthersDto.WalletOwnerId);
 
             if (sender == null)
@@ -373,7 +367,7 @@ namespace WalletPlusIncAPI.Services.Implementation
                     var receiverFiatWallet = await GetFiatWalletById(receiver.Id);
                     await WithdrawFromWalletInstant(fundOthersDto.Amount);
                     await FundWallet(receiverFiatWallet, fundOthersDto.Amount);
-                    response.Message = "wallet funded";
+                    response.Message = $"funds successfully sent to {fundOthersDto.Username}";
                     response.Data = true;
                     response.Success = true;
                     return response;
@@ -518,7 +512,35 @@ namespace WalletPlusIncAPI.Services.Implementation
         public async Task<ServiceResponse<bool>> WithdrawFromWallet(WithdrawalDto withdrawalDto)
         {
             var response = new ServiceResponse<bool>();
+              var currencyExist = await _currencyService.CurrencyExist(withdrawalDto.CurrencyId);
 
+            if (!currencyExist.Success)
+            {
+                response.Data = false;
+                response.Success = false;
+                response.Message = "Currency Not found, currency id provided is invalid";
+                  return response;
+            }
+
+            var walletExist = CheckWallet(withdrawalDto.WalletId);
+
+            if (!walletExist.Success)
+            {
+                 response.Success = false;
+                response.Message = "Wallet Not found, wallet id provided is invalid";
+                  return response;
+            }
+
+            var loggedInUserId = GetUserId();
+            var userWallets = GetWalletsByUserId(loggedInUserId);
+
+            if (userWallets.Data.All(w => w.Id != withdrawalDto.WalletId))
+            {
+                   response.Success = false;
+                response.Message = "Unable to withdraw from this wallet,This wallet is not owned by you";
+                  return response;
+            }
+               
             var wallet = _walletRepository.GetWalletById(withdrawalDto.WalletId);
 
             if (wallet == null)
@@ -547,6 +569,7 @@ namespace WalletPlusIncAPI.Services.Implementation
 
                     response.Message = "transaction success";
                     response.Success = true;
+                    response.Data = true;
                     return response;
                 }
                 else
@@ -598,14 +621,32 @@ namespace WalletPlusIncAPI.Services.Implementation
         }
             
 
-        public async Task<ServiceResponse<bool>> ChangeMainCurrency(Wallet oldWallet, Wallet newWallet)
+        public async Task<ServiceResponse<bool>> ChangeMainCurrency(ChangeMainCurrencyDto changeMainCurrencyDto)
         {
             var response = new ServiceResponse<bool>();
-            oldWallet.IsMain = false;
-            newWallet.IsMain = true;
+            var old = GetWalletById(changeMainCurrencyDto.OldMainCurrencyWalletId);
+            var @new = GetWalletById(changeMainCurrencyDto.NewMainCurrencyWalletId);
 
-            await UpdateWallet(oldWallet);
-            await UpdateWallet(newWallet);
+            if (old.Data == null || @new.Data == null)
+            {
+                response.Success = false;
+                response.Message = "one of the ids entered is incorrect, wallet not found";
+                return response;
+            }
+
+
+            if (old.Data.OwnerId != @new.Data.OwnerId)
+            {
+                response.Success = false;
+                response.Message = "Wallets user do not match, Wallets does not belong to the same user";
+                return response;
+            }
+
+            old.Data.IsMain = false;
+            @new.Data.IsMain = true;
+
+            await UpdateWallet(old.Data);
+            await UpdateWallet(@new.Data);
 
             response.Success = true;
             response.Message = "Main wallet changed";
