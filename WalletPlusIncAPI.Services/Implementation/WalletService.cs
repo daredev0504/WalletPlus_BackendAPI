@@ -26,7 +26,7 @@ namespace WalletPlusIncAPI.Services.Implementation
         private readonly ICurrencyService _currencyService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<AppUser> _userManager;
-       
+        private readonly ILoggerService _loggerService;
         
 
 
@@ -38,7 +38,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             _currencyService = serviceProvider.GetRequiredService<ICurrencyService>();
             _httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
             _userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
-
+            _loggerService = serviceProvider.GetRequiredService<ILoggerService>();
            
             
         }
@@ -348,6 +348,7 @@ namespace WalletPlusIncAPI.Services.Implementation
                 response.Data = false;
                 response.Success = false;
                 response.Message = "Currency Not found, currency id provided is invalid";
+                _loggerService.LogError(response.Message);
                   return response;
             }
 
@@ -356,6 +357,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             if (sender == null)
             {
                 response.Message = "user not found";
+                  _loggerService.LogError(response.Message);
                 response.Data = false;
                 return response;
             }
@@ -368,6 +370,7 @@ namespace WalletPlusIncAPI.Services.Implementation
                     await WithdrawFromWalletInstant(fundOthersDto.Amount);
                     await FundWallet(receiverFiatWallet, fundOthersDto.Amount);
                     response.Message = $"funds successfully sent to {fundOthersDto.Username}";
+                      _loggerService.LogInfo(response.Message);
                     response.Data = true;
                     response.Success = true;
                     return response;

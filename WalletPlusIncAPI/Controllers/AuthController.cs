@@ -25,11 +25,12 @@ namespace WalletPlusIncAPI.Controllers
         private readonly IAppUserService _appUserService;
         private readonly IWalletService _walletService;
         private readonly IAuthenticationManager _authenticationManager;
-       
+        private readonly ILoggerService _loggerService;
 
 
         public AuthController(IServiceProvider serviceProvider)
         {
+            _loggerService = serviceProvider.GetRequiredService<ILoggerService>();
               _mapper = serviceProvider.GetRequiredService<IMapper>();
             _walletService = serviceProvider.GetRequiredService<IWalletService>();
             _userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();

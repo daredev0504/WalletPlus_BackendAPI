@@ -21,6 +21,8 @@ namespace WalletPlusIncAPI.Controllers
         private readonly ICurrencyService _currencyService;
         private readonly IAppUserService _appUserService;
         private readonly IFundingService _fundsService;
+         
+
         
         public WalletController(IServiceProvider serviceProvider)
         {
@@ -28,6 +30,7 @@ namespace WalletPlusIncAPI.Controllers
             _currencyService = serviceProvider.GetRequiredService<ICurrencyService>();
             _appUserService = serviceProvider.GetRequiredService<IAppUserService>();
             _fundsService = serviceProvider.GetRequiredService<IFundingService>();
+             
         }
 
 
@@ -43,7 +46,11 @@ namespace WalletPlusIncAPI.Controllers
             var result = await _walletService.DeleteWallet(id);
 
             if (!result.Success)
-                return BadRequest(ResponseMessage.Message("Unable to delete wallet", "error encountered while deleting the wallet", id));
+            {
+                 return BadRequest(ResponseMessage.Message("Unable to delete wallet", "error encountered while deleting the wallet", id));
+                
+            }
+               
 
             return Ok(result);
         }
@@ -88,7 +95,10 @@ namespace WalletPlusIncAPI.Controllers
             var result = _walletService.GetWalletById(id);
 
             if (result == null)
-                return BadRequest(ResponseMessage.Message("Wallet not found", "invalid wallet id", id));
+            {
+                 return BadRequest(ResponseMessage.Message("Wallet not found", "invalid wallet id", id));
+            }
+               
 
             return Ok(result);
         }
