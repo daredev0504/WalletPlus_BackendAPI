@@ -423,6 +423,7 @@ namespace WalletPlusIncAPI.Services.Implementation
           
         }
 
+        // this method funds funds a wallet
         public async Task<ServiceResponse<bool>> FundPremiumWallet(Funding funding)
         {
             var response = new ServiceResponse<bool>();
@@ -469,33 +470,31 @@ namespace WalletPlusIncAPI.Services.Implementation
           
         }
 
-        public async Task<ServiceResponse<bool>> AwardPremiumWalletPoint(decimal point)
+        public async Task<LimitTypes> AwardPremiumWalletPoint(decimal point)
         {
-            var response = new ServiceResponse<bool>();
             var userId = GetUserId();
             var wallet  = await GetPointWalletById(userId);
 
-            if ( CanAddMorePointToWallet(wallet.Balance))
+            if ( CanAddMorePointToWallet(wallet.Balance, point))
             {
                 wallet.Balance += point;
 
                 await UpdateWallet(wallet);
-
-                response.Success = true;
-                response.Data = true;
-                response.Message = ($"{point} points added");
-                return response;
+                return LimitTypes.Normal;
+            }
+            if (wallet.Balance < LimitCalc.LimitForPoint && point > LimitCalc.LimitForPoint)
+            {
+                var rem = LimitCalc.LimitForPoint - wallet.Balance;
+                wallet.Balance += rem;
+                  await UpdateWallet(wallet);
+                return LimitTypes.NotReached;
             }
 
-            response.Success = false;
-            response.Data = false;
-            response.Message = ("point threshold reaches, cannot add more points");
-
-            return response;
+            return LimitTypes.Reached;
         }
 
         public bool CanWithdrawFromWallet(decimal balance, decimal? amount) => (balance - amount) >= 0;
-        private bool CanAddMorePointToWallet(decimal balance) => (balance) <= LimitCalc.LimitForPoint;
+        private bool CanAddMorePointToWallet(decimal balance, decimal points) => (balance + points) <= LimitCalc.LimitForPoint;
 
 
         public async Task WithdrawFromWalletInstant(decimal amount)

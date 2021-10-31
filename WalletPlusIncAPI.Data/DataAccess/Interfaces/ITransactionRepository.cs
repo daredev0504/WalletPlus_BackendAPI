@@ -12,7 +12,7 @@ namespace WalletPlusIncAPI.Data.DataAccess.Interfaces
 
         bool CheckTransaction(Guid transactionId);
 
-        List<Transaction> GetWalletTransactions(Guid walletId);
+        Task<List<Transaction>> GetWalletTransactions(Guid walletId);
 
     }
 }

@@ -13,12 +13,9 @@ using WalletPlusIncAPI.Services.Interfaces;
 namespace WalletPlusIncAPI.Controllers
 {
     /// <summary>
-    /// Controller
+    /// Wallet Controller
     /// </summary>
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    [Route("api/[controller]")]
-    [ApiController]
-    public class WalletController : ControllerBase
+    public class WalletController : BaseApiController
     {
         private readonly IWalletService _walletService;
         private readonly ICurrencyService _currencyService;
@@ -125,28 +122,13 @@ namespace WalletPlusIncAPI.Controllers
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> FundPremiumWallet(FundPremiumDto fundingDto)
         {
-            var currencyExist = await _currencyService.CurrencyExist(fundingDto.CurrencyId);
 
-            if (!currencyExist.Success)
-                return NotFound(ResponseMessage.Message("Currency Not found", "currency id provided is invalid", fundingDto));
+            var result = await _fundsService.CreateFunding(fundingDto);
 
-            var result = await _appUserService.GetUser(fundingDto.WalletOwnerId);
+            if (!result.Success)
+                return BadRequest(result);
 
-            if (result.Data == null)
-                return NotFound(ResponseMessage.Message("User Not found", "user id provided is invalid", fundingDto));
-
-            var wallet = await _walletService.GetFiatWalletById(fundingDto.WalletOwnerId);
-           
-
-            if (wallet == null)
-                return NotFound(ResponseMessage.Message("Wallet not found", "user does not have a wallet", fundingDto));
-
-            var freeWalletFunded = await _fundsService.CreateFunding(fundingDto, wallet.Id);
-
-            if (!freeWalletFunded)
-                return BadRequest(ResponseMessage.Message("Unable to fund wallet", $"this wallet has a limit of {LimitCalc.LimitForDeposit}", fundingDto));
-
-            return Ok(ResponseMessage.Message("Successfully funded, waiting approval from an Admin", null, fundingDto));
+            return Ok(result);
         }
 
       
@@ -194,7 +176,7 @@ namespace WalletPlusIncAPI.Controllers
         {
             var result = await _walletService.GetFiatWalletBalance();
 
-            return Ok(ResponseMessage.Message($"your point balance is {result} ", null, result));
+            return Ok(ResponseMessage.Message($"your fiat wallet balance is {result} ", null, result));
         }
 
         /// <summary>

@@ -10,6 +10,12 @@ namespace WalletPlusIncAPI.Helpers
     {
         public static decimal LimitForPoint{ get; set; } = 5000;
         public static decimal LimitForDeposit{ get; set; } = 1000000;
-       
+    }
+
+     public enum LimitTypes
+    {
+        Reached,
+        NotReached,
+        Normal
     }
 }

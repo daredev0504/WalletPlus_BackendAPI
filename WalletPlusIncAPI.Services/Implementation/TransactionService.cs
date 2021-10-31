@@ -33,7 +33,7 @@ namespace WalletPlusIncAPI.Services.Implementation
                 var orderedTransactions = result.OrderByDescending(x => x.Created_at).ToList();
                 var transactionRead = _iMapper.Map<List<TransactionReadDto>>(orderedTransactions);
                 response.Success = true;
-                response.Message = "transaction deleted successfully";
+                response.Message = "transaction returned successfully";
                 response.Data = transactionRead;
                 return response;
             }
@@ -118,7 +118,7 @@ namespace WalletPlusIncAPI.Services.Implementation
         public async Task<ServiceResponse<List<TransactionReadDto>>> GetWalletTransactions(Guid walletId)
         {
             var response = new ServiceResponse<List<TransactionReadDto>>();
-            var result = _transactionRepository.GetWalletTransactions(walletId);
+            var result = await _transactionRepository.GetWalletTransactions(walletId);
 
             if (result != null)
             {

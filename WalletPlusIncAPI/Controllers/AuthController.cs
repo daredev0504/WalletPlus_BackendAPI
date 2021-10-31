@@ -1,9 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using WalletPlusIncAPI.Filters;
 using WalletPlusIncAPI.Helpers;
 using WalletPlusIncAPI.Models.Dtos.AppUser;
 using WalletPlusIncAPI.Models.Entities;
@@ -12,30 +15,26 @@ using WalletPlusIncAPI.Services.Interfaces;
 
 namespace WalletPlusIncAPI.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AuthController : ControllerBase
+    /// <summary>
+    /// Authentication Controller
+    /// </summary>
+    public class AuthController : BaseApiController
     {
         private readonly IMapper _mapper;
-        private readonly SignInManager<AppUser> _signInManager;
-        
         private readonly UserManager<AppUser> _userManager;
         private readonly IAppUserService _appUserService;
         private readonly IWalletService _walletService;
         private readonly IAuthenticationManager _authenticationManager;
-        private readonly ILoggerService _loggerService;
+       
 
 
-        public AuthController(IMapper mapper, SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IAppUserService appUserService, IWalletService walletService, IAuthenticationManager authenticationManager, ILoggerService loggerService)
+        public AuthController(IServiceProvider serviceProvider)
         {
-            _mapper = mapper;
-            _signInManager = signInManager;
-            
-            _userManager = userManager;
-            _appUserService = appUserService;
-            _walletService = walletService;
-            _authenticationManager = authenticationManager;
-            _loggerService = loggerService;
+              _mapper = serviceProvider.GetRequiredService<IMapper>();
+            _walletService = serviceProvider.GetRequiredService<IWalletService>();
+            _userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
+            _appUserService = serviceProvider.GetRequiredService<IAppUserService>();
+            _authenticationManager = serviceProvider.GetRequiredService<IAuthenticationManager>();
         }
 
       /// <summary>
@@ -44,28 +43,19 @@ namespace WalletPlusIncAPI.Controllers
       /// <param name="appUserRegisterDto"></param>
       /// <returns></returns>
         [HttpPost("signUp")]
+        [AllowAnonymous]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> SignUp(AppUserRegisterDto appUserRegisterDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ResponseMessage.Message("Make sure the required fields are filled properly", ModelState));
-
-            var checkUser = await _appUserService.FindAppUserByEmail(appUserRegisterDto.Email);
-            if (checkUser.Success)
-                return BadRequest(ResponseMessage.Message("User with the email already exist"));
-
             var result = await _appUserService.SignUp(appUserRegisterDto);
             if (!result.Success)
             {
-                return BadRequest(ResponseMessage.Message("Unable to register User"));
+                return BadRequest(result);
             }
-            return Ok(ResponseMessage.Message("Account Created", null, appUserRegisterDto));
-            //return RedirectToAction(nameof(SuccessRegistration));
-
+            return Ok(result);
 
         }
 
-
-     
 
         /// <summary>
         ///  User with accounts can Log in
@@ -73,6 +63,7 @@ namespace WalletPlusIncAPI.Controllers
         /// <param name="appUserLogin"></param>
         /// <returns></returns>
         [HttpPost("logIn")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(AppUserLoginDto appUserLogin)
         {
             if (!await _authenticationManager.ValidateUser(appUserLogin))
@@ -101,36 +92,6 @@ namespace WalletPlusIncAPI.Controllers
             
         }
       
-      /// <summary>
-      /// confirms your email
-      /// </summary>
-      /// <param name="token"></param>
-      /// <param name="email"></param>
-      /// <returns></returns>
-      [HttpGet]
-      [Route("confirmEmail")]
-      public async Task<IActionResult> ConfirmEmail(string token, string email)
-      {
-          var result = await _authenticationManager.ConfirmUserEmail(token, email);
-          if (result)
-          {
-              return Ok($"Thanks for confirming your EMAIL, email - {email}, token - {token}, you can now continue to LOGIN");
-          }
-
-          return BadRequest("error confirming email");
-      }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("Success")]
-        public IActionResult SuccessRegistration()
-        {
-            return Ok("Your account has been created, A link has been sent to your Mail,  Please check your email for verification.");
-        }
-
 
         /// <summary>
         /// Allows only logged-in admin to account details of any user
@@ -155,8 +116,11 @@ namespace WalletPlusIncAPI.Controllers
         public  async Task<IActionResult>  GetMyDetails()
         {
             var result = await _appUserService.GetMyDetails();
-
-            return Ok(result);
+            if (result.Success)
+            {
+               return Ok(result);
+            }
+            return BadRequest(result);
 
         }
 

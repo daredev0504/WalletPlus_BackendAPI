@@ -30,7 +30,7 @@ namespace WalletPlusIncAPI.Data.DataAccess.Implementation
 
         public bool CheckWallet(Guid walletId) => _context.Wallets.Any(w => w.Id == walletId);
 
-        public List<Wallet> GetAllMyWallets() => _context.Wallets.Include(w => w.Currency).Where(w => w.OwnerId == GetUserId()).ToList();
+        public List<Wallet> GetAllMyWallets() => _context.Wallets.Include(w => w.Currency).Where(w => w.OwnerId == GetUserId() ).ToList();
 
         //public Wallet GetWalletById(Guid? id) => _context.Wallets.Include(w => w.Currency).FirstOrDefault(w => w.Id == id);
 

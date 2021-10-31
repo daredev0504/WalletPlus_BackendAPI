@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,27 +10,25 @@ using WalletPlusIncAPI.Models.Dtos.AppUser;
 using WalletPlusIncAPI.Models.Dtos.Currency;
 using WalletPlusIncAPI.Models.Dtos.Funding;
 using WalletPlusIncAPI.Services.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WalletPlusIncAPI.Controllers
 {
-    /// <summary>
-    ///
-    /// </summary>
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AdminController : ControllerBase
+   /// <summary>
+   /// Admin Controller
+   /// </summary>
+    public class AdminController : BaseApiController
     {
         private readonly IFundingService _fundingService;
         private readonly IWalletService _walletService;
         private readonly IAppUserService _appUserService;
 
 
-        public AdminController(IFundingService fundingService, IWalletService walletService, IAppUserService appUserService)
+        public AdminController(IServiceProvider serviceProvider)
         {
-            _fundingService = fundingService;
-            _walletService = walletService;
-            _appUserService = appUserService;
+            _walletService = serviceProvider.GetRequiredService<IWalletService>();
+            _appUserService = serviceProvider.GetRequiredService<IAppUserService>();
+            _fundingService = serviceProvider.GetRequiredService<IFundingService>();
         }
 
         /// <summary>

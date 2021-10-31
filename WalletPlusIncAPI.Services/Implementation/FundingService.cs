@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.DependencyInjection;
 using WalletPlusIncAPI.Data.DataAccess.Interfaces;
 using WalletPlusIncAPI.Helpers;
 using WalletPlusIncAPI.Models.Dtos.Funding;
@@ -16,12 +17,14 @@ namespace WalletPlusIncAPI.Services.Implementation
         private readonly IFundRepository _fundingRepository;
         private readonly IMapper _iMapper;
         private readonly IWalletService _walletService;
+        private readonly ICurrencyService _currencyService;
 
-        public FundingService(IFundRepository fundingRepository, IMapper iMapper, IWalletService walletService)
+        public FundingService(IServiceProvider serviceProvider)
         {
-            _fundingRepository = fundingRepository;
-            _iMapper = iMapper;
-            _walletService = walletService;
+            _fundingRepository = serviceProvider.GetRequiredService<IFundRepository>();
+            _iMapper = serviceProvider.GetRequiredService<IMapper>();
+            _walletService = serviceProvider.GetRequiredService<IWalletService>();
+            _currencyService = serviceProvider.GetRequiredService<ICurrencyService>();
         }
 
 
@@ -33,16 +36,35 @@ namespace WalletPlusIncAPI.Services.Implementation
         }
 
 
-        public async Task<bool> CreateFunding(FundPremiumDto fundFreeDto, Guid walletId)
+        public async Task<ServiceResponse<bool>> CreateFunding(FundPremiumDto fundFreeDto)
         {
-            var userId = _walletService.GetUserId();
-            var wallet  = await _walletService.GetFiatWalletById(userId);
+            var response = new ServiceResponse<bool>();
+              var currencyExist = await _currencyService.CurrencyExist(fundFreeDto.CurrencyId);
+
+            if (!currencyExist.Success)
+            {
+                response.Data = false;
+                response.Success = false;
+                response.Message = "Currency Not found, currency id provided is invalid";
+                  return response;
+            }
+
+            var wallet = await _walletService.GetFiatWalletById(_walletService.GetUserId());
+               var walletPoint = await _walletService.GetPointWalletById(_walletService.GetUserId());
+
+            if (wallet == null)
+            {
+                 response.Success = false;
+                response.Message = "Wallet Not found, userid provided is invalid";
+                  return response;
+            }
+
             var result = WalletReachLimit(fundFreeDto.Amount, wallet.Balance);
             if (result)
             {
                 Funding funding = new Funding()
                 {
-                    DestinationId = walletId,
+                    DestinationId = wallet.Id,
                     CurrencyId = fundFreeDto.CurrencyId,
                     Amount = fundFreeDto.Amount,
                     IsApproved = false
@@ -50,40 +72,68 @@ namespace WalletPlusIncAPI.Services.Implementation
 
                 try
                 {
-                
+                    int points = 0;
                     if ( await _fundingRepository.Add(funding))
                     {
                     
-                        if (fundFreeDto.Amount >= 5000 && fundFreeDto.Amount <= 10000)
+                        if (fundFreeDto.Amount >= PercentagesCalc.Min && fundFreeDto.Amount <= PercentagesCalc.Max)
                         {
-                            int points  = (int) ((PercentagesCalc.PointOne / 100) * (double) fundFreeDto.Amount);
+                            points  = (int) ((PercentagesCalc.PointOne / 100) * (double) fundFreeDto.Amount);
 
                             await _walletService.AwardPremiumWalletPoint(points);
                         }
 
-                        if (fundFreeDto.Amount >= 10001 && fundFreeDto.Amount <= 25000)
+                        if (fundFreeDto.Amount >= PercentagesCalc.Min2 && fundFreeDto.Amount <= PercentagesCalc.Max2)
                         {
-                            int points = (int)Math.Round((PercentagesCalc.PointTwo/100) * (double) fundFreeDto.Amount);
+                            points = (int)Math.Round((PercentagesCalc.PointTwo/100) * (double) fundFreeDto.Amount);
                             await _walletService.AwardPremiumWalletPoint(points);
                         }
 
-                        if (fundFreeDto.Amount >= 25000)
+                        if (fundFreeDto.Amount >= PercentagesCalc.Max2)
                         {
-                            int points = (int)Math.Round((decimal) (PercentagesCalc.PointThree/100)  * fundFreeDto.Amount);
-                            await _walletService.AwardPremiumWalletPoint(points);
+                            points = (int)Math.Round((decimal) (PercentagesCalc.PointThree/100)  * fundFreeDto.Amount);
+                            var res = await _walletService.AwardPremiumWalletPoint(points);
+                            if ( res == LimitTypes.Reached)
+                            {
+                                 response.Data = true;
+                                response.Success = true;
+                                response.Message = $"you have succesfully funded your account, waiting for approval from admin. You have reached your point limit, you cannot receive more points";
+                                return response;
+                            }
+                             else if (res == LimitTypes.NotReached)
+                            {
+                                 response.Data = true;
+                                response.Success = true;
+                                response.Message = $"you have succesfully funded your account, waiting for approval from admin. , your point balance is fully reached at {walletPoint.Balance}";
+                                return response;
+                            }
+                            else
+                            {
+                                response.Data = true;
+                                response.Success = true;
+                                response.Message = $"you have succesfully funded your account, waiting for approval from admin. , you have received {points}";
+                                return response;
+                            }
+                                
                         }
                     }
-             
-
-                    return true;
+                    
+                    response.Data = true;
+                    response.Success = true;
+                    response.Message = $"you have succesfully funded your account, waiting for approval from admin";
+                    return response;
                 }
                 catch
                 {
-                    return false;
+                    response.Message= "An error occured";
+                    response.Success = false;
+                    return response;
                 }
             }
 
-            return false;
+            response.Message= $"An error occured, The Deposit limit is {LimitCalc.LimitForDeposit}";
+             response.Success = false;
+             return response;
 
         }
 
@@ -133,6 +183,6 @@ namespace WalletPlusIncAPI.Services.Implementation
             }
             return null;
         }
-        private bool WalletReachLimit(decimal deposit, decimal balance) => (deposit + balance) <= LimitCalc.LimitForDeposit; 
+        public bool WalletReachLimit(decimal deposit, decimal balance) => (deposit + balance) <= LimitCalc.LimitForDeposit; 
     }
 }

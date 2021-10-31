@@ -23,9 +23,10 @@ namespace WalletPlusIncAPI.Services.Interfaces
         void AddUserToRole(AppUser user, string role);
    
         Task<ServiceResponse<string>> ChangePassword(ChangePasswordDto model);
+         Task<ServiceResponse<string>> ActivateUser(string id);
+        Task<ServiceResponse<string>> DeactivateUser(string id);
+           Task<ServiceResponse<string>> IsUserActive();
        
-        Task ForgotPassword(ForgotPasswordDto model, string origin);
-        Task ResetPassword(ResetPasswordDto model);
-        //Task VerifyEmail(string token);
+     
     }
 }

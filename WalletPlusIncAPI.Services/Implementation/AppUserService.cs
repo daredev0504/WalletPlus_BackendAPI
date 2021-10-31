@@ -28,11 +28,11 @@ namespace WalletPlusIncAPI.Services.Implementation
       
 
 
-        public AppUserService(IServiceProvider serviceProvider, UserManager<AppUser> userManager, IHttpContextAccessor httpContextAccessor)
+        public AppUserService(IServiceProvider serviceProvider)
         {
-            _userManager = userManager;
+            _userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
             _authenticationManager = serviceProvider.GetRequiredService<IAuthenticationManager>();
-            _httpContextAccessor = httpContextAccessor;
+            _httpContextAccessor =serviceProvider.GetRequiredService<IHttpContextAccessor>();
             
             _mapper = serviceProvider.GetRequiredService<IMapper>();
             _loggerService = serviceProvider.GetRequiredService<ILoggerService>();
@@ -47,6 +47,15 @@ namespace WalletPlusIncAPI.Services.Implementation
         {
             ServiceResponse<AppUserReadDto> response = new ServiceResponse<AppUserReadDto>();
 
+             var checkUser = await FindAppUserByEmail(model.Email);
+
+            if (checkUser.Success)
+            {
+                response.Message = "User with the email already exist";
+                response.Success = false;
+                return response;
+            }
+              
             var domainAppUser = _mapper.Map<AppUser>(model);
             domainAppUser.Created_at = DateTime.Now;
 
@@ -54,8 +63,6 @@ namespace WalletPlusIncAPI.Services.Implementation
 
             if (result.Succeeded)
             {
-               
-
                 await _userManager.AddToRoleAsync(domainAppUser, "Premium");
                 var domainAppReadUser = _mapper.Map<AppUserReadDto>(domainAppUser);
 
@@ -146,6 +153,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             
             if (user == null)
             {
+                response.Success = false;
                 response.Message = "Sorry! cannot find this user";
                 return response;
             }
@@ -165,6 +173,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             var usertoReturn = await GetUser(user);
             if (usertoReturn.Data == null)
             {
+                response.Success = false;
                 response.Message = "Sorry! cannot find this user";
                 return response;
             }
@@ -289,21 +298,53 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-     
-       
-
-        public async Task<string> GenerateEmailConfirmationLink(AppUser user)
+         public async Task<ServiceResponse<string>> ActivateUser(string id)
         {
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            return token;
+            ServiceResponse<string> response = new ServiceResponse<string>();
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                response.Message = "cannot find user";
+                return response;
+            }
+            user.IsActive = true;
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                response.Success = true;
+                response.Message = "user activated";
+            }
+            else
+                response.Message = "Could not activate user";
+
+            return response;
         }
 
-        public Task ForgotPassword(ForgotPasswordDto model, string origin)
+        public async Task<ServiceResponse<string>> DeactivateUser(string id)
         {
-            throw new NotImplementedException();
+           var response = new ServiceResponse<string>();
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                response.Message = "cannot find user";
+                return response;
+            }
+            user.IsActive = false;
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                response.Success = true;
+                response.Message = "user deactivated";
+            }
+            else
+                response.Message = "user could not be deactivated";
+
+            return response;
         }
 
-        public Task ResetPassword(ResetPasswordDto model)
+        public Task<ServiceResponse<string>> IsUserActive()
         {
             throw new NotImplementedException();
         }

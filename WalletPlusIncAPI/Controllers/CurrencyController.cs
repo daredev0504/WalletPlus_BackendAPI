@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WalletPlusIncAPI.Helpers;
 using WalletPlusIncAPI.Models.Dtos.Currency;
@@ -9,11 +10,9 @@ using WalletPlusIncAPI.Services.Interfaces;
 namespace WalletPlusIncAPI.Controllers
 {
     /// <summary>
-    ///
+    /// Currency Controller
     /// </summary>
-    [Route("api/[controller]")]
-    [ApiController]
-    public class CurrencyController : ControllerBase
+    public class CurrencyController : BaseApiController
     {
         private readonly ICurrencyService _currencyService;
         private readonly IMapper _mapper;
@@ -33,8 +32,9 @@ namespace WalletPlusIncAPI.Controllers
         /// Get all country codes
         /// </summary>
         /// <returns></returns>
-        //[HttpGet(ApiRoutes.Posts.GetAllCurrencies)]
+      
         [HttpGet("GetAllCurrencies")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAllCurrencies()
         {
             var currencies = await _currencyService.GetAllCurrencies();

@@ -5,9 +5,9 @@
     </assembly>
     <members>
         <member name="T:WalletPlusIncAPI.Controllers.AdminController">
-             <summary>
-            
-             </summary>
+            <summary>
+            Admin Controller
+            </summary>
         </member>
         <member name="M:WalletPlusIncAPI.Controllers.AdminController.GetAllUsers(WalletPlusIncAPI.Helpers.RequestFeatures.AppUserParameters)">
             <summary>
@@ -49,6 +49,11 @@
             <param name="approveFundingDto"></param>
             <returns></returns>
         </member>
+        <member name="T:WalletPlusIncAPI.Controllers.AuthController">
+            <summary>
+            Authentication Controller
+            </summary>
+        </member>
         <member name="M:WalletPlusIncAPI.Controllers.AuthController.SignUp(WalletPlusIncAPI.Models.Dtos.AppUser.AppUserRegisterDto)">
             <summary>
             Registers a new user automatically creating a main wallet for the user.
@@ -61,20 +66,6 @@
              User with accounts can Log in
             </summary>
             <param name="appUserLogin"></param>
-            <returns></returns>
-        </member>
-        <member name="M:WalletPlusIncAPI.Controllers.AuthController.ConfirmEmail(System.String,System.String)">
-            <summary>
-            confirms your email
-            </summary>
-            <param name="token"></param>
-            <param name="email"></param>
-            <returns></returns>
-        </member>
-        <member name="M:WalletPlusIncAPI.Controllers.AuthController.SuccessRegistration">
-            <summary>
-            
-            </summary>
             <returns></returns>
         </member>
         <member name="M:WalletPlusIncAPI.Controllers.AuthController.GetUser(System.String)">
@@ -90,10 +81,15 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="T:WalletPlusIncAPI.Controllers.BaseApiController">
+            <summary>
+            Base Controller
+            </summary>
+        </member>
         <member name="T:WalletPlusIncAPI.Controllers.CurrencyController">
-             <summary>
-            
-             </summary>
+            <summary>
+            Currency Controller
+            </summary>
         </member>
         <member name="M:WalletPlusIncAPI.Controllers.CurrencyController.#ctor(WalletPlusIncAPI.Services.Interfaces.ICurrencyService,AutoMapper.IMapper)">
             <summary>
@@ -109,9 +105,9 @@
             <returns></returns>
         </member>
         <member name="T:WalletPlusIncAPI.Controllers.TransactionController">
-             <summary>
-            
-             </summary>
+            <summary>
+            Transaction Controller
+            </summary>
         </member>
         <member name="M:WalletPlusIncAPI.Controllers.TransactionController.#ctor(WalletPlusIncAPI.Services.Interfaces.ITransactionService)">
             <summary>
@@ -121,7 +117,7 @@
         </member>
         <member name="M:WalletPlusIncAPI.Controllers.TransactionController.GetMyTransaction">
             <summary>
-            Allows only logged-in Premium and Free account holders to get all transactions made on every of their wallet
+            Allows only logged-in Premium account holders to get all transactions made on every of their wallet
             </summary>
             <returns></returns>
         </member>
@@ -145,9 +141,47 @@
             <param name="walletId"></param>
             <returns></returns>
         </member>
+        <member name="T:WalletPlusIncAPI.Controllers.UserController">
+            <summary>
+            User Controller
+            </summary>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.UserController.#ctor(System.IServiceProvider)">
+            <summary>
+            UserController constructor
+            </summary>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.UserController.UpdateUser(WalletPlusIncAPI.Models.Dtos.AppUser.AppUserUpdateDto)">
+            <summary>
+            Updates a User in the database
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.UserController.ActivateUser(System.String)">
+            <summary>
+            Activate a User in the database
+            </summary>
+            <param name="userId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.UserController.DeactivateUser(System.String)">
+            <summary>
+            Deactivates a User in the database
+            </summary>
+            <param name="userId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.UserController.ChangePassword(WalletPlusIncAPI.Models.Dtos.AppUser.ChangePasswordDto)">
+            <summary>
+            Implements a logged in user's change password functionality
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
         <member name="T:WalletPlusIncAPI.Controllers.WalletController">
             <summary>
-            Controller
+            Wallet Controller
             </summary>
         </member>
         <member name="M:WalletPlusIncAPI.Controllers.WalletController.DeleteWallet(System.Guid)">

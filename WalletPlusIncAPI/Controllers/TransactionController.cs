@@ -8,11 +8,9 @@ using WalletPlusIncAPI.Services.Interfaces;
 namespace WalletPlusIncAPI.Controllers
 {
     /// <summary>
-    ///
+    /// Transaction Controller
     /// </summary>
-    [Route("api/[controller]")]
-    [ApiController]
-    public class TransactionController : ControllerBase
+    public class TransactionController : BaseApiController
     {
         private readonly ITransactionService _transactionService;
 
@@ -26,30 +24,38 @@ namespace WalletPlusIncAPI.Controllers
         }
 
         /// <summary>
-        /// Allows only logged-in Premium and Free account holders to get all transactions made on every of their wallet
+        /// Allows only logged-in Premium account holders to get all transactions made on every of their wallet
         /// </summary>
         /// <returns></returns>
         [Authorize(Roles = "Premium")]
         [HttpGet]
         public async Task<IActionResult> GetMyTransaction()
         {
-            var transactions = await _transactionService.GetMyTransactions();
-
-            return Ok(ResponseMessage.Message("List of all my transaction", null, transactions.Data));
+            var result = await _transactionService.GetMyTransactions();
+            if (result.Success)
+            {
+                    return Ok(result);
+            }
+            return BadRequest(result);
+        
         }
 
         /// <summary>
         /// Get transactions from a specific wallet
         /// </summary>
         /// <returns></returns>
-        [Authorize(Roles = "Premium")]
+        [Authorize(Roles = "Premium,Admin")]
         [Route("{walletId}/getTransactionByWallet")]
         [HttpGet]
         public async Task<IActionResult> GetWalletTransaction(Guid walletId)
         {
-            var transactions = await _transactionService.GetWalletTransactions(walletId);
+            var result = await _transactionService.GetWalletTransactions(walletId);
 
-            return Ok(ResponseMessage.Message("List of all transaction in this wallet", null, transactions.Data));
+            if (result.Success)
+            {
+                    return Ok(result);
+            }
+            return BadRequest(result);
         }
 
         /// <summary>
@@ -78,10 +84,7 @@ namespace WalletPlusIncAPI.Controllers
         public async Task<IActionResult> GetWalletDebitTransaction(Guid walletId)
         {
             var transactions = await _transactionService.GetWalletTransactionsByDebit(walletId);
-            //if ()
-            //{
-
-            //}
+          
             return Ok(ResponseMessage.Message("List of all debit transactions in this wallet", null, transactions));
         }
     }

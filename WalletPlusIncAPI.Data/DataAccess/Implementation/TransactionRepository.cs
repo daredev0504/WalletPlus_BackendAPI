@@ -30,7 +30,7 @@ namespace WalletPlusIncAPI.Data.DataAccess.Implementation
 
         public bool CheckTransaction(Guid transactionId) => _context.Transactions.Any(t => t.Id == transactionId);
 
-        public List<Transaction> GetWalletTransactions(Guid walletId) => _context.Transactions.Where(t => t.WalletId == walletId).ToList();
+        public async Task<List<Transaction>> GetWalletTransactions(Guid walletId) => await _context.Transactions.Where(t => t.WalletId == walletId).ToListAsync();
 
     }
 }
