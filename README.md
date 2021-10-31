@@ -1,0 +1,2 @@
+# WalletPlus_BackendAPI
+WalletPlus Inc is a company with over 1 million customers. Their platform empowers their customers to use their e-Wallet to do various type of transactions. Each customer, upon sign-up, automatic get two e-wallets; one for holding the money for their transaction and the other one for holding point earned. Each transaction e-Wallet has a limit $1,000,000. Customer can fund, spend, earn points and check the amount they have in the e-Wallet as well as the point earned. 
