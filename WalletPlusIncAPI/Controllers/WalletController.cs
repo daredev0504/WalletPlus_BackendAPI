@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Commander.API.ActionFilters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,7 +44,7 @@ namespace WalletPlusIncAPI.Controllers
         [HttpDelete("deleteWallet/{id}")]
         public async Task<IActionResult> DeleteWallet(Guid id)
         {
-            var result = await _walletService.DeleteWallet(id);
+            var result = await _walletService.DeleteWalletAsync(id);
 
             if (!result.Success)
             {
@@ -75,7 +76,7 @@ namespace WalletPlusIncAPI.Controllers
             if (wallet.Data.OwnerId != loggedInUserId)
                 return BadRequest(ResponseMessage.Message("Invalid", "This wallet is not owned by you", walletDto));
 
-            var updated = await _walletService.UpdateWallet2(walletDto);
+            var updated = await _walletService.UpdateWallet2Async(walletDto);
 
             if (!updated.Success)
                 return BadRequest(ResponseMessage.Message("Unable to update wallet", "error encountered while updating the wallet", walletDto));
@@ -114,7 +115,7 @@ namespace WalletPlusIncAPI.Controllers
         public async Task<IActionResult> FundOthersWallet(FundOthersDto fundingDto)
         {
           
-            var result = await _walletService.FundOthers(fundingDto);
+            var result = await _walletService.FundOthersAsync(fundingDto);
             if (result.Success == false)
                 return BadRequest(result);
 
@@ -130,10 +131,11 @@ namespace WalletPlusIncAPI.Controllers
         [Authorize(Roles = "Premium, Admin")]
         [HttpPost("fundPremiumWallet")]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
+        [ServiceFilter(typeof(ValidateUserActiveAttribute))]
         public async Task<IActionResult> FundPremiumWallet(FundPremiumDto fundingDto)
         {
 
-            var result = await _fundsService.CreateFunding(fundingDto);
+            var result = await _fundsService.CreateFundingAsync(fundingDto);
 
             if (!result.Success)
                 return BadRequest(result);
@@ -152,7 +154,7 @@ namespace WalletPlusIncAPI.Controllers
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> WithdrawFromWallet(WithdrawalDto withdrawalDto)
         {
-            var result = await _walletService.WithdrawFromWallet(withdrawalDto);
+            var result = await _walletService.WithdrawFromWalletAsync(withdrawalDto);
 
             if (!result.Success)
                 return BadRequest(result);
@@ -184,7 +186,7 @@ namespace WalletPlusIncAPI.Controllers
         [HttpGet("fiatBalance")]
         public async Task<IActionResult> GetFiatWalletBalance()
         {
-            var result = await _walletService.GetFiatWalletBalance();
+            var result = await _walletService.GetFiatWalletBalanceAsync();
 
             return Ok(ResponseMessage.Message($"your fiat wallet balance is {result} ", null, result));
         }
@@ -197,7 +199,7 @@ namespace WalletPlusIncAPI.Controllers
         [HttpGet("pointBalance")]
         public async Task<IActionResult> GetPointWallet()
         {
-            var result = await _walletService.GetPointWalletBalance();
+            var result = await _walletService.GetPointWalletBalanceAsync();
             if (result != null)
             {
                 return Ok(ResponseMessage.Message($"your point balance is {result} ", null, result));

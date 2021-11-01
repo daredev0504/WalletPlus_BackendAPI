@@ -31,7 +31,7 @@ namespace WalletPlusIncAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetMyTransaction()
         {
-            var result = await _transactionService.GetMyTransactions();
+            var result = await _transactionService.GetMyTransactionsAsync();
             if (result.Success)
             {
                     return Ok(result);
@@ -49,7 +49,7 @@ namespace WalletPlusIncAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetWalletTransaction(Guid walletId)
         {
-            var result = await _transactionService.GetWalletTransactions(walletId);
+            var result = await _transactionService.GetWalletTransactionsAsync(walletId);
 
             if (result.Success)
             {
@@ -68,7 +68,7 @@ namespace WalletPlusIncAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetWalletCreditTransaction(Guid walletId)
         {
-            var transactions = await _transactionService.GetWalletTransactionsByCredit(walletId);
+            var transactions = await _transactionService.GetWalletTransactionsByCreditAsync(walletId);
 
             return Ok(ResponseMessage.Message("List of all credit transactions in this wallet", null, transactions));
         }
@@ -83,7 +83,7 @@ namespace WalletPlusIncAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetWalletDebitTransaction(Guid walletId)
         {
-            var transactions = await _transactionService.GetWalletTransactionsByDebit(walletId);
+            var transactions = await _transactionService.GetWalletTransactionsByDebitAsync(walletId);
           
             return Ok(ResponseMessage.Message("List of all debit transactions in this wallet", null, transactions));
         }

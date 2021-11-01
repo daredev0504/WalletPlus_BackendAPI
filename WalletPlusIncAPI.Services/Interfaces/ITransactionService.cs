@@ -8,21 +8,21 @@ namespace WalletPlusIncAPI.Services.Interfaces
 {
     public interface ITransactionService
     {
-        Task<ServiceResponse<List<TransactionReadDto>>> GetMyTransactions();
+        Task<ServiceResponse<List<TransactionReadDto>>> GetMyTransactionsAsync();
 
-        Task<ServiceResponse<bool>> CreateTransaction(TransactionType type, decimal amount, Guid walletId,
+        Task<ServiceResponse<bool>> CreateTransactionAsync(TransactionType type, decimal amount, Guid walletId,
             int? currencyId);
 
-        Task<ServiceResponse<bool>> DeleteTransaction(Guid id);
+        Task<ServiceResponse<bool>> DeleteTransactionAsync(Guid id);
 
         ServiceResponse<bool> CheckTransaction(Guid transactionId);
 
-        Task<ServiceResponse<Transaction>> GetTransactionById(Guid id);
+        Task<ServiceResponse<Transaction>> GetTransactionByIdAsync(Guid id);
 
-        Task<ServiceResponse<List<TransactionReadDto>>> GetWalletTransactions(Guid walletId);
-        Task<List<TransactionReadDto>> GetWalletTransactionsByCredit(Guid walletId);
-        Task<List<TransactionReadDto>> GetWalletTransactionsByDebit(Guid walletId);
+        Task<ServiceResponse<List<TransactionReadDto>>> GetWalletTransactionsAsync(Guid walletId);
+        Task<List<TransactionReadDto>> GetWalletTransactionsByCreditAsync(Guid walletId);
+        Task<List<TransactionReadDto>> GetWalletTransactionsByDebitAsync(Guid walletId);
 
-        Task<ServiceResponse<List<Transaction>>> GetAllTransactions();
+        Task<ServiceResponse<List<Transaction>>> GetAllTransactionsAsync();
     }
 }

@@ -41,7 +41,7 @@ namespace WalletPlusIncAPI.Controllers
         public async Task<IActionResult> UpdateUser([FromBody] AppUserUpdateDto model)
         {
             var user = await _userManager.GetUserAsync(User);
-            var result = await _appUserService.UpdateUser(user, model);
+            var result = await _appUserService.UpdateUserAsync(user, model);
             if (result.Success) return NoContent();
             return BadRequest(result);
         }
@@ -56,7 +56,7 @@ namespace WalletPlusIncAPI.Controllers
         [HttpPatch("activate-user/{userId}")]
         public async Task<IActionResult> ActivateUser(string userId)
         {
-            var result = await _appUserService.ActivateUser(userId);
+            var result = await _appUserService.ActivateUserAsync(userId);
             if (result.Success) return NoContent();
             return BadRequest(result);
         }
@@ -70,7 +70,7 @@ namespace WalletPlusIncAPI.Controllers
         [HttpPatch("deactivate-user/{userId}")]
         public async Task<IActionResult> DeactivateUser(string userId)
         {
-            var result = await _appUserService.DeactivateUser(userId);
+            var result = await _appUserService.DeactivateUserAsync(userId);
             if (result.Success) return NoContent();
             return BadRequest(result);
         }
@@ -84,7 +84,7 @@ namespace WalletPlusIncAPI.Controllers
         [HttpPatch("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto model)
         {
-            var result = await _appUserService.ChangePassword(model);
+            var result = await _appUserService.ChangePasswordAsync(model);
             if (result.Success) return Ok(result);
             return BadRequest(result);
         }

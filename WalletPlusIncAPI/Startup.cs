@@ -10,6 +10,7 @@ using WalletPlusIncAPI.Data.Data;
 using WalletPlusIncAPI.Extensions;
 using WalletPlusIncAPI.Filters;
 using WalletPlusIncAPI.Models.Entities;
+using Commander.API.ActionFilters;
 
 namespace WalletPlusIncAPI
 {
@@ -56,6 +57,7 @@ namespace WalletPlusIncAPI
             services.ConfigureFundsRepository();
             services.ConfigureAppUserService();
             services.AddScoped<ValidationFilterAttribute>();
+            services.AddScoped<ValidateUserActiveAttribute>();
           
         }
 

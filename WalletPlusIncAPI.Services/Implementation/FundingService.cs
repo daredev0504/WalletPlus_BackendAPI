@@ -36,7 +36,7 @@ namespace WalletPlusIncAPI.Services.Implementation
         }
 
 
-        public async Task<ServiceResponse<bool>> CreateFunding(FundPremiumDto fundFreeDto)
+        public async Task<ServiceResponse<bool>> CreateFundingAsync(FundPremiumDto fundFreeDto)
         {
             var response = new ServiceResponse<bool>();
               var currencyExist = await _currencyService.CurrencyExist(fundFreeDto.CurrencyId);
@@ -49,8 +49,8 @@ namespace WalletPlusIncAPI.Services.Implementation
                   return response;
             }
 
-            var wallet = await _walletService.GetFiatWalletById(_walletService.GetUserId());
-               var walletPoint = await _walletService.GetPointWalletById(_walletService.GetUserId());
+            var wallet = await _walletService.GetFiatWalletByIdAsync(_walletService.GetUserId());
+               var walletPoint = await _walletService.GetPointWalletByIdAsync(_walletService.GetUserId());
 
             if (wallet == null)
             {
@@ -80,19 +80,19 @@ namespace WalletPlusIncAPI.Services.Implementation
                         {
                             points  = (int) ((PercentagesCalc.PointOne / 100) * (double) fundFreeDto.Amount);
 
-                            await _walletService.AwardPremiumWalletPoint(points);
+                            await _walletService.AwardPremiumWalletPointAsync(points);
                         }
 
                         if (fundFreeDto.Amount >= PercentagesCalc.Min2 && fundFreeDto.Amount <= PercentagesCalc.Max2)
                         {
                             points = (int)Math.Round((PercentagesCalc.PointTwo/100) * (double) fundFreeDto.Amount);
-                            await _walletService.AwardPremiumWalletPoint(points);
+                            await _walletService.AwardPremiumWalletPointAsync(points);
                         }
 
                         if (fundFreeDto.Amount >= PercentagesCalc.Max2)
                         {
                             points = (int)Math.Round((decimal) (PercentagesCalc.PointThree/100)  * fundFreeDto.Amount);
-                            var res = await _walletService.AwardPremiumWalletPoint(points);
+                            var res = await _walletService.AwardPremiumWalletPointAsync(points);
                             if ( res == LimitTypes.Reached)
                             {
                                  response.Data = true;
@@ -137,7 +137,7 @@ namespace WalletPlusIncAPI.Services.Implementation
 
         }
 
-        public async Task<bool> DeleteFunding(Guid id)
+        public async Task<bool> DeleteFundingAsync(Guid id)
         {
             try
             {

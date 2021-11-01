@@ -125,16 +125,16 @@ namespace WalletPlusIncAPI.Tests.WalletTests
         }
         private void MockUp(bool state)
         {
-            mockFundingService.Setup(service => service.CreateFunding(It.IsAny<FundPremiumDto>()))
+            mockFundingService.Setup(service => service.CreateFundingAsync(It.IsAny<FundPremiumDto>()))
                 .ReturnsAsync((new ServiceResponse<bool>(){ Success = state }));
             mockCurrencyService.Setup(service => service.CurrencyExist(It.IsAny<int>())).Returns(Task.FromResult(new ServiceResponse<bool>(){Success = state}));
-            mockAppUserService.Setup(service => service.GetUser(It.IsAny<string>()))
+            mockAppUserService.Setup(service => service.GetUserAsync(It.IsAny<string>()))
                 .ReturnsAsync((new ServiceResponse<AppUser>() {Success = state, Data = new AppUser()}));
-            mockWalletService.Setup(service => service.GetFiatWalletById(It.IsAny<string>()))
+            mockWalletService.Setup(service => service.GetFiatWalletByIdAsync(It.IsAny<string>()))
                 .ReturnsAsync((new Wallet()));
-             mockWalletService.Setup(service => service.WithdrawFromWallet(It.IsAny<WithdrawalDto>()))
+             mockWalletService.Setup(service => service.WithdrawFromWalletAsync(It.IsAny<WithdrawalDto>()))
                 .ReturnsAsync((new ServiceResponse<bool>(){ Success = state }));
-              mockWalletService.Setup(service => service.FundOthers(It.IsAny<FundOthersDto>()))
+              mockWalletService.Setup(service => service.FundOthersAsync(It.IsAny<FundOthersDto>()))
                 .ReturnsAsync((new ServiceResponse<bool>(){ Success = state }));
         }
     }

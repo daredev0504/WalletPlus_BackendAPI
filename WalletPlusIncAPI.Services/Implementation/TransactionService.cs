@@ -23,7 +23,7 @@ namespace WalletPlusIncAPI.Services.Implementation
         }
 
 
-        public async Task<ServiceResponse<List<TransactionReadDto>>> GetMyTransactions()
+        public async Task<ServiceResponse<List<TransactionReadDto>>> GetMyTransactionsAsync()
         {
             var response = new ServiceResponse<List<TransactionReadDto>>();
             var result =  await _transactionRepository.GetMyTransactions();
@@ -42,7 +42,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-        public async Task<ServiceResponse<bool>> CreateTransaction(TransactionType type, decimal amount, Guid walletId,
+        public async Task<ServiceResponse<bool>> CreateTransactionAsync(TransactionType type, decimal amount, Guid walletId,
             int? currencyId)
         {
             var response = new ServiceResponse<bool>();
@@ -70,7 +70,7 @@ namespace WalletPlusIncAPI.Services.Implementation
         }
 
 
-        public async Task<ServiceResponse<bool>> DeleteTransaction(Guid id)
+        public async Task<ServiceResponse<bool>> DeleteTransactionAsync(Guid id)
         {
             var response = new ServiceResponse<bool>();
             var result = await _transactionRepository.DeleteById(id);
@@ -100,7 +100,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-        public async Task<ServiceResponse<Transaction>> GetTransactionById(Guid id)
+        public async Task<ServiceResponse<Transaction>> GetTransactionByIdAsync(Guid id)
         {
             var response = new ServiceResponse<Transaction>();
             var result = await _transactionRepository.GetById(id);
@@ -115,7 +115,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-        public async Task<ServiceResponse<List<TransactionReadDto>>> GetWalletTransactions(Guid walletId)
+        public async Task<ServiceResponse<List<TransactionReadDto>>> GetWalletTransactionsAsync(Guid walletId)
         {
             var response = new ServiceResponse<List<TransactionReadDto>>();
             var result = await _transactionRepository.GetWalletTransactions(walletId);
@@ -134,21 +134,21 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-        public async Task<List<TransactionReadDto>> GetWalletTransactionsByCredit(Guid walletId)
+        public async Task<List<TransactionReadDto>> GetWalletTransactionsByCreditAsync(Guid walletId)
         {
-            var allTransactions = await GetWalletTransactions(walletId);
+            var allTransactions = await GetWalletTransactionsAsync(walletId);
             var creditTransactions = allTransactions.Data.Where(x => x.Type == "Credit").ToList();
             return creditTransactions;
         }
 
-        public async Task<List<TransactionReadDto>> GetWalletTransactionsByDebit(Guid walletId)
+        public async Task<List<TransactionReadDto>> GetWalletTransactionsByDebitAsync(Guid walletId)
         {
-            var allTransactions = await GetWalletTransactions(walletId);
+            var allTransactions = await GetWalletTransactionsAsync(walletId);
             var debitTransactions = allTransactions.Data.Where(x => x.Type == "Debit").ToList();
             return debitTransactions;
         }
 
-        public async Task<ServiceResponse<List<Transaction>>> GetAllTransactions()
+        public async Task<ServiceResponse<List<Transaction>>> GetAllTransactionsAsync()
         {
             var response = new ServiceResponse<List<Transaction>>();
             var result =await _transactionRepository.GetAll().ToListAsync();

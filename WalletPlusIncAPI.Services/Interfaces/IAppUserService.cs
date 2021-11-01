@@ -10,22 +10,22 @@ namespace WalletPlusIncAPI.Services.Interfaces
     public interface IAppUserService
     {
         string GetUserId();
-        Task<ServiceResponse<AppUserReadDto>> SignUp(AppUserRegisterDto model);
+        Task<ServiceResponse<AppUserReadDto>> SignUpAsync(AppUserRegisterDto model);
        
-        Task<ServiceResponse<string>> UpdateUser(AppUser user, AppUserUpdateDto model);
-        Task<PagedList<AppUserReadDto>> GetUsers(AppUserParameters parameters);
-        Task<ServiceResponse<AppUser>> GetUser(string id);
-        Task<ServiceResponse<AppUserReadDto>> GetMyDetails();
-        Task<ServiceResponse<string>> DeleteUser(string id);
-        Task<ServiceResponse<AppUserReadDto>> FindAppUserByEmail(string email);
-        Task<IList<string>> GetUserRoles(AppUser user);
-        Task<ServiceResponse<string>> ChangeUserRole(string userId, ChangeUserAccountTypeDto model);
+        Task<ServiceResponse<string>> UpdateUserAsync(AppUser user, AppUserUpdateDto model);
+        Task<PagedList<AppUserReadDto>> GetUsersAsync(AppUserParameters parameters);
+        Task<ServiceResponse<AppUser>> GetUserAsync(string id);
+        Task<ServiceResponse<AppUserReadDto>> GetMyDetailsAsync();
+        Task<ServiceResponse<string>> DeleteUserAsync(string id);
+        Task<ServiceResponse<AppUserReadDto>> FindAppUserByEmailAsync(string email);
+        Task<IList<string>> GetUserRolesAsync(AppUser user);
+        Task<ServiceResponse<string>> ChangeUserRoleAsync(string userId, ChangeUserAccountTypeDto model);
         void AddUserToRole(AppUser user, string role);
    
-        Task<ServiceResponse<string>> ChangePassword(ChangePasswordDto model);
-         Task<ServiceResponse<string>> ActivateUser(string id);
-        Task<ServiceResponse<string>> DeactivateUser(string id);
-           Task<ServiceResponse<string>> IsUserActive();
+        Task<ServiceResponse<string>> ChangePasswordAsync(ChangePasswordDto model);
+        Task<ServiceResponse<string>> ActivateUserAsync(string id);
+        Task<ServiceResponse<string>> DeactivateUserAsync(string id);
+        Task<bool> IsUserActiveAsync();
        
      
     }

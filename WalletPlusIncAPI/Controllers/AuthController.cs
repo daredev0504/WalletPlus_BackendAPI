@@ -48,7 +48,7 @@ namespace WalletPlusIncAPI.Controllers
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> SignUp(AppUserRegisterDto appUserRegisterDto)
         {
-            var result = await _appUserService.SignUp(appUserRegisterDto);
+            var result = await _appUserService.SignUpAsync(appUserRegisterDto);
             if (!result.Success)
             {
                 return BadRequest(result);
@@ -72,7 +72,7 @@ namespace WalletPlusIncAPI.Controllers
                 _loggerService.LogWarn($"{nameof(Login)}: Authentication failed. Wrong user name or password.");
                 return Unauthorized("Wrong user name or password");
             }
-            var userResponse = await _appUserService.FindAppUserByEmail(appUserLogin.Email);
+            var userResponse = await _appUserService.FindAppUserByEmailAsync(appUserLogin.Email);
             var user = _mapper.Map<AppUser>(userResponse.Data);
             var roles = await _authenticationManager.GetRoles(appUserLogin);
             var token = await _authenticationManager.CreateToken(user);
@@ -103,7 +103,7 @@ namespace WalletPlusIncAPI.Controllers
         [HttpGet("getUserDetail/{id}")]
         public async Task<IActionResult> GetUser(string id)
         {
-            var result = await _appUserService.GetUser(id);
+            var result = await _appUserService.GetUserAsync(id);
 
             return Ok(result);
         }
@@ -116,7 +116,7 @@ namespace WalletPlusIncAPI.Controllers
         [HttpGet("getMyDetails")]
         public  async Task<IActionResult>  GetMyDetails()
         {
-            var result = await _appUserService.GetMyDetails();
+            var result = await _appUserService.GetMyDetailsAsync();
             if (result.Success)
             {
                return Ok(result);

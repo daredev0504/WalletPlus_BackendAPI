@@ -49,7 +49,7 @@ namespace WalletPlusIncAPI.Services.Implementation
            return  _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
         }
 
-        public async Task<ServiceResponse<bool>> AddWallet(Wallet wallet)
+        public async Task<ServiceResponse<bool>> AddWalletAsync(Wallet wallet)
         {
             var response = new ServiceResponse<bool>();
             try
@@ -67,7 +67,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             }
         }
 
-        public async Task<ServiceResponse<bool>> DeleteWallet(Guid id)
+        public async Task<ServiceResponse<bool>> DeleteWalletAsync(Guid id)
         {
             var response = new ServiceResponse<bool>();
             try
@@ -85,7 +85,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             }
         }
 
-        public async Task<ServiceResponse<bool>> UpdateWallet(Wallet wallet)
+        public async Task<ServiceResponse<bool>> UpdateWalletAsync(Wallet wallet)
         {
             var response = new ServiceResponse<bool>();
             
@@ -102,7 +102,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
             
         }
-        public async Task<ServiceResponse<bool>> UpdateWallet2(WalletUpdateDto updateWalletDto)
+        public async Task<ServiceResponse<bool>> UpdateWallet2Async(WalletUpdateDto updateWalletDto)
         {
             var response = new ServiceResponse<bool>();
             var walletToUpdate = await _walletRepository.GetById(updateWalletDto.WalletId);
@@ -206,7 +206,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-        public async Task<Wallet> GetFiatWalletById(string userId)
+        public async Task<Wallet> GetFiatWalletByIdAsync(string userId)
         {
             var wallet = await _walletRepository.GetFiatWalletById(userId);
             //var walletReaddto = _mapper.Map<WalletReadDto>(wallet);
@@ -215,7 +215,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             
         }
 
-        public async Task<Wallet> GetPointWalletById(string userId)
+        public async Task<Wallet> GetPointWalletByIdAsync(string userId)
         {
             var wallet = await _walletRepository.GetPointWalletById(userId);
             //var walletReaddto = _mapper.Map<WalletReadDto>(wallet);
@@ -294,7 +294,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-         public async Task<ServiceResponse<bool>> MergeAllWalletsToMain(AppUser user)
+         public async Task<ServiceResponse<bool>> MergeAllWalletsToMainAsync(AppUser user)
         {
             var response = new ServiceResponse<bool>();
 
@@ -305,7 +305,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             {
                 foreach (var wallet in userWallets)
                 {
-                    await FundWallet(mainWallet, wallet);
+                    await FundWalletAsync(mainWallet, wallet);
                     await _walletRepository.DeleteById(wallet.Id);
                 }
                
@@ -319,12 +319,12 @@ namespace WalletPlusIncAPI.Services.Implementation
         }
 
       
-        public async Task<ServiceResponse<bool>> FundWallet(Wallet wallet, decimal amount)
+        public async Task<ServiceResponse<bool>> FundWalletAsync(Wallet wallet, decimal amount)
         {
             var response = new ServiceResponse<bool>();
             wallet.Balance += amount;
 
-            var result = await _transactionService.CreateTransaction(TransactionType.Credit, amount, wallet.Id,
+            var result = await _transactionService.CreateTransactionAsync(TransactionType.Credit, amount, wallet.Id,
                 wallet.CurrencyId);
             if (result.Data)
             {
@@ -334,11 +334,12 @@ namespace WalletPlusIncAPI.Services.Implementation
                 return response;
             }
             response.Message = "transaction failed";
+             _loggerService.LogError(response.Message);
             response.Success = false;
             return response;
         }
 
-        public async Task<ServiceResponse<bool>> FundOthers(FundOthersDto fundOthersDto)
+        public async Task<ServiceResponse<bool>> FundOthersAsync(FundOthersDto fundOthersDto)
         {
             var response = new ServiceResponse<bool>();
                var currencyExist = await _currencyService.CurrencyExist(fundOthersDto.CurrencyId);
@@ -366,9 +367,9 @@ namespace WalletPlusIncAPI.Services.Implementation
                 var receiver = await _userManager.FindByNameAsync(fundOthersDto.Username);
                 if (receiver != null)
                 {
-                    var receiverFiatWallet = await GetFiatWalletById(receiver.Id);
-                    await WithdrawFromWalletInstant(fundOthersDto.Amount);
-                    await FundWallet(receiverFiatWallet, fundOthersDto.Amount);
+                    var receiverFiatWallet = await GetFiatWalletByIdAsync(receiver.Id);
+                    await WithdrawFromWalletInstantAsync(fundOthersDto.Amount);
+                    await FundWalletAsync(receiverFiatWallet, fundOthersDto.Amount);
                     response.Message = $"funds successfully sent to {fundOthersDto.Username}";
                       _loggerService.LogInfo(response.Message);
                     response.Data = true;
@@ -378,15 +379,15 @@ namespace WalletPlusIncAPI.Services.Implementation
                 else
                 {
                     response.Message = "wallet not funded";
+                     _loggerService.LogError(response.Message);
                     response.Data = false;
                     return response;
                 }
               
             }
         }
-        public async Task<ServiceResponse<bool>> FundWallet(Wallet main, Wallet source)
+        public async Task<ServiceResponse<bool>> FundWalletAsync(Wallet main, Wallet source)
         {
-            //var wallet = GetWalletById(funding.DestinationId);
             var response = new ServiceResponse<bool>();
             if (main == null)
             {
@@ -401,7 +402,7 @@ namespace WalletPlusIncAPI.Services.Implementation
                 {
                     main.Balance += source.Balance;
 
-                    await _transactionService.CreateTransaction(TransactionType.Credit, source.Balance, main.Id,
+                    await _transactionService.CreateTransactionAsync(TransactionType.Credit, source.Balance, main.Id,
                         source.CurrencyId);
                 }
                 else
@@ -413,21 +414,22 @@ namespace WalletPlusIncAPI.Services.Implementation
 
                     main.Balance += newAmount ?? 0;
 
-                    await _transactionService.CreateTransaction(TransactionType.Credit, newAmount ?? 0, main.Id,
+                    await _transactionService.CreateTransactionAsync(TransactionType.Credit, newAmount ?? 0, main.Id,
                         source.CurrencyId);
                 }
 
-                await UpdateWallet(main);
+                await UpdateWalletAsync(main);
                 
                 response.Success = true;
                 response.Message = "wallet funded successfully";
+                 _loggerService.LogInfo(response.Message);
                 return response;
             }
           
         }
 
         // this method funds funds a wallet
-        public async Task<ServiceResponse<bool>> FundPremiumWallet(Funding funding)
+        public async Task<ServiceResponse<bool>> FundPremiumWalletAsync(Funding funding)
         {
             var response = new ServiceResponse<bool>();
             var wallet = _walletRepository.GetWalletById(funding.DestinationId);
@@ -447,7 +449,7 @@ namespace WalletPlusIncAPI.Services.Implementation
                 {
                     wallet.Balance += funding.Amount;
 
-                    var transactioResult = await _transactionService.CreateTransaction(TransactionType.Credit, funding.Amount, wallet.Id,
+                    await _transactionService.CreateTransactionAsync(TransactionType.Credit, funding.Amount, wallet.Id,
                         wallet.CurrencyId);
 
                    
@@ -462,10 +464,10 @@ namespace WalletPlusIncAPI.Services.Implementation
 
                     wallet.Balance += newAmount ?? 0;
 
-                    await _transactionService.CreateTransaction(TransactionType.Credit, newAmount ?? 0, wallet.Id, funding.CurrencyId);
+                    await _transactionService.CreateTransactionAsync(TransactionType.Credit, newAmount ?? 0, wallet.Id, funding.CurrencyId);
                 }
 
-                await UpdateWallet(wallet);
+                await UpdateWalletAsync(wallet);
                 response.Success = true;
                 response.Message = "free wallet funded successfully";
                 return response;
@@ -473,23 +475,24 @@ namespace WalletPlusIncAPI.Services.Implementation
           
         }
 
-        public async Task<LimitTypes> AwardPremiumWalletPoint(decimal point)
+        //this method gives a user points based on how much was deposited
+        public async Task<LimitTypes> AwardPremiumWalletPointAsync(decimal point)
         {
             var userId = GetUserId();
-            var wallet  = await GetPointWalletById(userId);
+            var wallet  = await GetPointWalletByIdAsync(userId);
 
             if ( CanAddMorePointToWallet(wallet.Balance, point))
             {
                 wallet.Balance += point;
 
-                await UpdateWallet(wallet);
+                await UpdateWalletAsync(wallet);
                 return LimitTypes.Normal;
             }
             if (wallet.Balance < LimitCalc.LimitForPoint && point > LimitCalc.LimitForPoint)
             {
                 var rem = LimitCalc.LimitForPoint - wallet.Balance;
                 wallet.Balance += rem;
-                  await UpdateWallet(wallet);
+                  await UpdateWalletAsync(wallet);
                 return LimitTypes.NotReached;
             }
 
@@ -500,18 +503,18 @@ namespace WalletPlusIncAPI.Services.Implementation
         private bool CanAddMorePointToWallet(decimal balance, decimal points) => (balance + points) <= LimitCalc.LimitForPoint;
 
 
-        public async Task WithdrawFromWalletInstant(decimal amount)
+        public async Task WithdrawFromWalletInstantAsync(decimal amount)
         {
-            var wallet  = await GetFiatWalletById(GetUserId());
+            var wallet  = await GetFiatWalletByIdAsync(GetUserId());
 
             wallet.Balance -= amount;
-            await _transactionService.CreateTransaction(TransactionType.Debit, amount,wallet.Id,
+            await _transactionService.CreateTransactionAsync(TransactionType.Debit, amount,wallet.Id,
                 wallet.CurrencyId);
 
-            await UpdateWallet(wallet);
+            await UpdateWalletAsync(wallet);
         }
 
-        public async Task<ServiceResponse<bool>> WithdrawFromWallet(WithdrawalDto withdrawalDto)
+        public async Task<ServiceResponse<bool>> WithdrawFromWalletAsync(WithdrawalDto withdrawalDto)
         {
             var response = new ServiceResponse<bool>();
               var currencyExist = await _currencyService.CurrencyExist(withdrawalDto.CurrencyId);
@@ -564,7 +567,7 @@ namespace WalletPlusIncAPI.Services.Implementation
                     }
                     wallet.Balance -= withdrawalDto.Amount;
 
-                    await _transactionService.CreateTransaction(TransactionType.Debit, withdrawalDto.Amount, withdrawalDto.WalletId,
+                    await _transactionService.CreateTransactionAsync(TransactionType.Debit, withdrawalDto.Amount, withdrawalDto.WalletId,
                         withdrawalDto.CurrencyId);
 
                  
@@ -590,10 +593,10 @@ namespace WalletPlusIncAPI.Services.Implementation
 
                     wallet.Balance -= newAmount ?? 0;
 
-                    await _transactionService.CreateTransaction(TransactionType.Debit, newAmount ?? 0, withdrawalDto.WalletId, withdrawalDto.CurrencyId);
+                    await _transactionService.CreateTransactionAsync(TransactionType.Debit, newAmount ?? 0, withdrawalDto.WalletId, withdrawalDto.CurrencyId);
                 }
 
-                await UpdateWallet(wallet);
+                await UpdateWalletAsync(wallet);
 
             }
             response.Message = "transaction success";
@@ -602,7 +605,7 @@ namespace WalletPlusIncAPI.Services.Implementation
 
         }             
 
-        public async Task<ServiceResponse<bool>> WithdrawFromMain(string userId, decimal amount)
+        public async Task<ServiceResponse<bool>> WithdrawFromMainAsync(string userId, decimal amount)
         {
             var response = new ServiceResponse<bool>();
             var mainWallet = GetUserMainCurrencyWallet(userId);
@@ -616,14 +619,14 @@ namespace WalletPlusIncAPI.Services.Implementation
 
             mainWallet.Data.Balance -= amount;
 
-            await UpdateWallet(mainWallet.Data);
+            await UpdateWalletAsync(mainWallet.Data);
             response.Message = "withdraw success";
             response.Success = true;
             return response;
         }
             
 
-        public async Task<ServiceResponse<bool>> ChangeMainCurrency(ChangeMainCurrencyDto changeMainCurrencyDto)
+        public async Task<ServiceResponse<bool>> ChangeMainCurrencyAsync(ChangeMainCurrencyDto changeMainCurrencyDto)
         {
             var response = new ServiceResponse<bool>();
             var old = GetWalletById(changeMainCurrencyDto.OldMainCurrencyWalletId);
@@ -647,8 +650,8 @@ namespace WalletPlusIncAPI.Services.Implementation
             old.Data.IsMain = false;
             @new.Data.IsMain = true;
 
-            await UpdateWallet(old.Data);
-            await UpdateWallet(@new.Data);
+            await UpdateWalletAsync(old.Data);
+            await UpdateWalletAsync(@new.Data);
 
             response.Success = true;
             response.Message = "Main wallet changed";
@@ -656,15 +659,15 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-        public async Task<string> GetFiatWalletBalance()
+        public async Task<string> GetFiatWalletBalanceAsync()
         {
-            var wallet = await GetFiatWalletById(GetUserId());
+            var wallet = await GetFiatWalletByIdAsync(GetUserId());
             return wallet.Balance.ToString(CultureInfo.InvariantCulture);
         }
 
-        public async Task<string> GetPointWalletBalance()
+        public async Task<string> GetPointWalletBalanceAsync()
         {
-            var wallet = await GetPointWalletById(GetUserId());
+            var wallet = await GetPointWalletByIdAsync(GetUserId());
             return wallet.Balance.ToString(CultureInfo.InvariantCulture);
         }
     }

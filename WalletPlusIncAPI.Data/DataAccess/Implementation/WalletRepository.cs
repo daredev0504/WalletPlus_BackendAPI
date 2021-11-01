@@ -32,8 +32,6 @@ namespace WalletPlusIncAPI.Data.DataAccess.Implementation
 
         public List<Wallet> GetAllMyWallets() => _context.Wallets.Include(w => w.Currency).Where(w => w.OwnerId == GetUserId() ).ToList();
 
-        //public Wallet GetWalletById(Guid? id) => _context.Wallets.Include(w => w.Currency).FirstOrDefault(w => w.Id == id);
-
           public List<Wallet> GetWalletsById(Guid id) => _context.Wallets.Include(w => w.Currency).Where(w => w.Id == id).ToList();
          public Wallet GetWalletById(Guid? id) => _context.Wallets.Where(w => w.WalletType == WalletType.Fiat).Include(w => w.Currency).FirstOrDefault(w => w.Id == id);
           public async Task<Wallet> GetFiatWalletById(string userId) => await _context.Wallets.Where(w => w.WalletType == WalletType.Fiat).Include(w => w.Currency).FirstOrDefaultAsync(w => w.OwnerId == userId);

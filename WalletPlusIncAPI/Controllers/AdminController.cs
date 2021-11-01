@@ -39,7 +39,7 @@ namespace WalletPlusIncAPI.Controllers
         [HttpGet("getAllUsers")]
         public async Task<IActionResult> GetAllUsers([FromQuery] AppUserParameters appUserParameters)
         {
-            var users = await _appUserService.GetUsers(appUserParameters);
+            var users = await _appUserService.GetUsersAsync(appUserParameters);
             return Ok(ResponseMessage.Message("List of all users", null, users));
         }
 
@@ -87,7 +87,7 @@ namespace WalletPlusIncAPI.Controllers
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> ChangeUserMainCurrency(ChangeMainCurrencyDto changeMainCurrencyDto)
         {
-            var result = await _walletService.ChangeMainCurrency(changeMainCurrencyDto);
+            var result = await _walletService.ChangeMainCurrencyAsync(changeMainCurrencyDto);
             if (!result.Success)
                 return BadRequest(result);
 
@@ -105,21 +105,21 @@ namespace WalletPlusIncAPI.Controllers
        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> ChangeUserAccountType(string userId, ChangeUserAccountTypeDto changeUserAccountTypeDto)
         {
-            var user =await _appUserService.GetUser(changeUserAccountTypeDto.UserId);
+            var user =await _appUserService.GetUserAsync(changeUserAccountTypeDto.UserId);
             if (user == null)
                 return BadRequest(ResponseMessage.Message("Invalid user Id", "user with the id was not found", changeUserAccountTypeDto));
 
-            var roles = await _appUserService.GetUserRoles(user.Data);
+            var roles = await _appUserService.GetUserRolesAsync(user.Data);
             var oldRole = roles.FirstOrDefault();
 
             if (roles.Count < 0)
                 _appUserService.AddUserToRole(user.Data, changeUserAccountTypeDto.NewType);
             else
-                await _appUserService.ChangeUserRole(userId, changeUserAccountTypeDto);
+                await _appUserService.ChangeUserRoleAsync(userId, changeUserAccountTypeDto);
 
             if (changeUserAccountTypeDto.NewType == "Free")
             {
-                await _walletService.MergeAllWalletsToMain(user.Data);
+                await _walletService.MergeAllWalletsToMainAsync(user.Data);
             }
 
             return Ok(ResponseMessage.Message("Account type changed successfully", null, changeUserAccountTypeDto));
@@ -145,12 +145,12 @@ namespace WalletPlusIncAPI.Controllers
             if (wallet == null)
                 return BadRequest(ResponseMessage.Message("Invalid wallet Id", "wallet with the id was not found", approveFundingDto));
 
-            var funded = await _walletService.FundPremiumWallet(funding);
+            var funded = await _walletService.FundPremiumWalletAsync(funding);
             
             if (!funded.Success)
                 return BadRequest(ResponseMessage.Message("Unable to fund account", "and error was encountered while trying to fund this account", approveFundingDto));
 
-            await _fundingService.DeleteFunding(approveFundingDto.FundingId);
+            await _fundingService.DeleteFundingAsync(approveFundingDto.FundingId);
 
             return Ok(ResponseMessage.Message("Free account funded", null, approveFundingDto));
         }

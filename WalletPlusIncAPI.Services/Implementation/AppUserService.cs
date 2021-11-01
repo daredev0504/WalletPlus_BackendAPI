@@ -43,11 +43,11 @@ namespace WalletPlusIncAPI.Services.Implementation
 
         public string GetUserId() => _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        public async Task<ServiceResponse<AppUserReadDto>> SignUp(AppUserRegisterDto model)
+        public async Task<ServiceResponse<AppUserReadDto>> SignUpAsync(AppUserRegisterDto model)
         {
             ServiceResponse<AppUserReadDto> response = new ServiceResponse<AppUserReadDto>();
 
-             var checkUser = await FindAppUserByEmail(model.Email);
+             var checkUser = await FindAppUserByEmailAsync(model.Email);
 
             if (checkUser.Success)
             {
@@ -83,8 +83,8 @@ namespace WalletPlusIncAPI.Services.Implementation
                     OwnerId = domainAppReadUser.Id
                 };
 
-                await _walletService.AddWallet(wallet);
-                await _walletService.AddWallet(wallet2);
+                await _walletService.AddWalletAsync(wallet);
+                await _walletService.AddWalletAsync(wallet2);
                 //await _emailSender.SendEmailAsync(message);
 
                 response.Message = "user created successfully";
@@ -106,7 +106,7 @@ namespace WalletPlusIncAPI.Services.Implementation
 
       
 
-        public async Task<ServiceResponse<string>> UpdateUser(AppUser user, AppUserUpdateDto model)
+        public async Task<ServiceResponse<string>> UpdateUserAsync(AppUser user, AppUserUpdateDto model)
         {
             ServiceResponse<string> response = new ServiceResponse<string>();
             
@@ -134,7 +134,8 @@ namespace WalletPlusIncAPI.Services.Implementation
 
             return response;
         }
-        public async Task<PagedList<AppUserReadDto>> GetUsers(AppUserParameters parameters)
+
+        public async Task<PagedList<AppUserReadDto>> GetUsersAsync(AppUserParameters parameters)
         {
             var users = await _userManager.Users.ToListAsync();
             var appReadDtoList = _mapper.Map<ICollection<AppUserReadDto>>(users);
@@ -145,7 +146,7 @@ namespace WalletPlusIncAPI.Services.Implementation
         }
 
         
-        public async Task<ServiceResponse<AppUser>> GetUser(string id)
+        public async Task<ServiceResponse<AppUser>> GetUserAsync(string id)
         {
             ServiceResponse<AppUser> response = new ServiceResponse<AppUser>();
 
@@ -165,12 +166,12 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-        public async Task<ServiceResponse<AppUserReadDto>> GetMyDetails()
+        public async Task<ServiceResponse<AppUserReadDto>> GetMyDetailsAsync()
         {
             ServiceResponse<AppUserReadDto> response = new ServiceResponse<AppUserReadDto>();
 
             var user = GetUserId();
-            var usertoReturn = await GetUser(user);
+            var usertoReturn = await GetUserAsync(user);
             if (usertoReturn.Data == null)
             {
                 response.Success = false;
@@ -186,7 +187,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-        public async Task<ServiceResponse<AppUserReadDto>> FindAppUserByEmail(string email)
+        public async Task<ServiceResponse<AppUserReadDto>> FindAppUserByEmailAsync(string email)
         {
             ServiceResponse<AppUserReadDto> response = new ServiceResponse<AppUserReadDto>();
 
@@ -205,7 +206,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
 
         }
-        public async Task<ServiceResponse<string>> DeleteUser(string id)
+        public async Task<ServiceResponse<string>> DeleteUserAsync(string id)
         {
             ServiceResponse<string> response = new ServiceResponse<string>();
             var user = await _userManager.FindByIdAsync(id.ToString());
@@ -231,9 +232,9 @@ namespace WalletPlusIncAPI.Services.Implementation
                 return response;
             }
         }
-        public Task<IList<string>> GetUserRoles(AppUser user) => _userManager.GetRolesAsync(user);
+        public Task<IList<string>> GetUserRolesAsync(AppUser user) => _userManager.GetRolesAsync(user);
 
-        public async Task<ServiceResponse<string>> ChangeUserRole(string userId, ChangeUserAccountTypeDto model)
+        public async Task<ServiceResponse<string>> ChangeUserRoleAsync(string userId, ChangeUserAccountTypeDto model)
         {
             var response = new ServiceResponse<string>();
             var user = await _userManager.FindByIdAsync(userId);
@@ -266,7 +267,7 @@ namespace WalletPlusIncAPI.Services.Implementation
         }
 
       
-        public async Task<ServiceResponse<string>> ChangePassword(ChangePasswordDto model)
+        public async Task<ServiceResponse<string>> ChangePasswordAsync(ChangePasswordDto model)
         {
            var response = new ServiceResponse<string>();
             if (model == null)
@@ -282,7 +283,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             }
 
             var loggedInUser = GetUserId();
-            var appUser = await FindAppUserByEmail(loggedInUser);
+            var appUser = await FindAppUserByEmailAsync(loggedInUser);
             var domainAppUser = _mapper.Map<AppUser>(appUser.Data);
 
             var result = await _userManager.ChangePasswordAsync(domainAppUser, model.OldPassword, model.NewPassword);
@@ -298,7 +299,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-         public async Task<ServiceResponse<string>> ActivateUser(string id)
+         public async Task<ServiceResponse<string>> ActivateUserAsync(string id)
         {
             ServiceResponse<string> response = new ServiceResponse<string>();
             var user = await _userManager.FindByIdAsync(id);
@@ -321,7 +322,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-        public async Task<ServiceResponse<string>> DeactivateUser(string id)
+        public async Task<ServiceResponse<string>> DeactivateUserAsync(string id)
         {
            var response = new ServiceResponse<string>();
             var user = await _userManager.FindByIdAsync(id);
@@ -344,9 +345,10 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-        public Task<ServiceResponse<string>> IsUserActive()
+        public async Task<bool> IsUserActiveAsync()
         {
-            throw new NotImplementedException();
+            var result = await GetMyDetailsAsync();
+            return result.Data.IsActive;
         }
     }
 }

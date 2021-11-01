@@ -11,20 +11,20 @@ namespace WalletPlusIncAPI.Services.Interfaces
     public interface IWalletService
     {
         string GetUserId();
-        Task<ServiceResponse<bool>> AddWallet(Wallet wallet);
-        Task<ServiceResponse<bool>> DeleteWallet(Guid id);
-        Task<ServiceResponse<bool>> UpdateWallet(Wallet wallet);
-        Task<ServiceResponse<bool>> UpdateWallet2(WalletUpdateDto updateWalletDto);
-        Task<ServiceResponse<bool>> MergeAllWalletsToMain(AppUser user);
+        Task<ServiceResponse<bool>> AddWalletAsync(Wallet wallet);
+        Task<ServiceResponse<bool>> DeleteWalletAsync(Guid id);
+        Task<ServiceResponse<bool>> UpdateWalletAsync(Wallet wallet);
+        Task<ServiceResponse<bool>> UpdateWallet2Async(WalletUpdateDto updateWalletDto);
+        Task<ServiceResponse<bool>> MergeAllWalletsToMainAsync(AppUser user);
         ServiceResponse<bool> CheckWallet(Guid walletId);
 
         ServiceResponse<List<WalletReadDto>> GetAllMyWallets();
 
         ServiceResponse<Wallet> GetWalletById(Guid? id);
-        Task<Wallet> GetFiatWalletById(string userId);
-        Task<string>GetFiatWalletBalance();
-        Task<string>GetPointWalletBalance();
-        Task<Wallet> GetPointWalletById(string userId);
+        Task<Wallet> GetFiatWalletByIdAsync(string userId);
+        Task<string>GetFiatWalletBalanceAsync();
+        Task<string>GetPointWalletBalanceAsync();
+        Task<Wallet> GetPointWalletByIdAsync(string userId);
 
         ServiceResponse<List<Wallet>> GetWalletsById(Guid id);
 
@@ -33,18 +33,18 @@ namespace WalletPlusIncAPI.Services.Interfaces
         ServiceResponse<Wallet> GetUserMainCurrencyWallet(string userId);
 
         ServiceResponse<List<WalletReadDto>> GetAllWallets();
-        Task<ServiceResponse<bool>> FundWallet(Wallet wallet, decimal amount);
-        Task<ServiceResponse<bool>> FundWallet(Wallet main, Wallet source);
-        Task<ServiceResponse<bool>> FundPremiumWallet(Funding funding);
-        Task<ServiceResponse<bool>> FundOthers(FundOthersDto fundOthersDto);
-        Task<LimitTypes> AwardPremiumWalletPoint(decimal point);
+        Task<ServiceResponse<bool>> FundWalletAsync(Wallet wallet, decimal amount);
+        Task<ServiceResponse<bool>> FundWalletAsync(Wallet main, Wallet source);
+        Task<ServiceResponse<bool>> FundPremiumWalletAsync(Funding funding);
+        Task<ServiceResponse<bool>> FundOthersAsync(FundOthersDto fundOthersDto);
+        Task<LimitTypes> AwardPremiumWalletPointAsync(decimal point);
         bool CanWithdrawFromWallet(decimal balance, decimal? amount);
 
-        Task<ServiceResponse<bool>> WithdrawFromWallet(WithdrawalDto withdrawalDto);
-        Task<ServiceResponse<bool>> WithdrawFromMain(string userId, decimal amount);
+        Task<ServiceResponse<bool>> WithdrawFromWalletAsync(WithdrawalDto withdrawalDto);
+        Task<ServiceResponse<bool>> WithdrawFromMainAsync(string userId, decimal amount);
 
-        Task WithdrawFromWalletInstant(decimal amount);
-        Task<ServiceResponse<bool>> ChangeMainCurrency(ChangeMainCurrencyDto changeMainCurrencyDto);
+        Task WithdrawFromWalletInstantAsync(decimal amount);
+        Task<ServiceResponse<bool>> ChangeMainCurrencyAsync(ChangeMainCurrencyDto changeMainCurrencyDto);
 
         ServiceResponse<List<Wallet>> GetUserWalletsByCurrencyId(string userId, int currencyId);
 
