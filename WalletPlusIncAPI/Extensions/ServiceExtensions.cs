@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using WalletManagementAPI.Helper.MailService;
 using WalletPlusIncAPI.Data.Data;
 using WalletPlusIncAPI.Data.DataAccess.Implementation;
 using WalletPlusIncAPI.Data.DataAccess.Interfaces;
@@ -119,7 +120,10 @@ namespace WalletPlusIncAPI.Extensions
 
 
         public static void ConfigureLoggerService(this IServiceCollection services) => services.AddSingleton<ILoggerService, LoggerService>();
+        public static void ConfigureEmailService(this IServiceCollection services) => services.AddTransient<IEmailSender, EmailSender>();
         public static void ConfigureAppUserService(this IServiceCollection services) => services.AddScoped<IAppUserService, AppUserService>();
+        public static void ConfigureImageService(this IServiceCollection services) => services.AddScoped<IImageService, ImageService>();
+         public static void ConfigureFollowService(this IServiceCollection services) => services.AddScoped<IFollowService, FollowService>();
         public static void ConfigureCurrencyService(this IServiceCollection services) => services.AddScoped<ICurrencyService, CurrencyService>();
         public static void ConfigureFundingService(this IServiceCollection services) => services.AddScoped<IFundingService, FundingService>();
         public static void ConfigureWalletService(this IServiceCollection services) => services.AddScoped<IWalletService, WalletService>();
@@ -128,6 +132,7 @@ namespace WalletPlusIncAPI.Extensions
         public static void ConfigureFundsRepository(this IServiceCollection services) => services.AddScoped<IFundRepository, FundRepository>();
         public static void ConfigureTransactionRepository(this IServiceCollection services) => services.AddScoped<ITransactionRepository, TransactionRepository>();
         public static void ConfigureWalletRepository(this IServiceCollection services) => services.AddScoped<IWalletRepository, WalletRepository>();
+         public static void ConfigureFollowRepository(this IServiceCollection services) => services.AddScoped<IFollowRepository, FollowRepository>();
         public static void ConfigureAuthManager(this IServiceCollection services) => services.AddScoped<IAuthenticationManager, AuthenticationManager>();
 
     }

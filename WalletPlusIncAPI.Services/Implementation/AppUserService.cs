@@ -4,14 +4,17 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using WalletPlusIncAPI.Helpers.ImageService;
 using WalletPlusIncAPI.Helpers.RequestFeatures;
 using WalletPlusIncAPI.Models.Dtos.AppUser;
 using WalletPlusIncAPI.Models.Entities;
+using WalletPlusIncAPI.Services.AuthManager;
 using WalletPlusIncAPI.Services.Interfaces;
 
 namespace WalletPlusIncAPI.Services.Implementation
@@ -19,25 +22,27 @@ namespace WalletPlusIncAPI.Services.Implementation
     public class AppUserService : IAppUserService
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IAuthenticationManager _authenticationManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
-       
+        private readonly IImageService _imageService;
         private readonly ILoggerService _loggerService;
         private readonly IMapper _mapper;
         private readonly IWalletService _walletService;
-      
+
 
 
         public AppUserService(IServiceProvider serviceProvider)
         {
+            _roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             _userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
             _authenticationManager = serviceProvider.GetRequiredService<IAuthenticationManager>();
-            _httpContextAccessor =serviceProvider.GetRequiredService<IHttpContextAccessor>();
-            
+            _httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+            _imageService = serviceProvider.GetRequiredService<IImageService>();
             _mapper = serviceProvider.GetRequiredService<IMapper>();
             _loggerService = serviceProvider.GetRequiredService<ILoggerService>();
             _walletService = serviceProvider.GetRequiredService<IWalletService>();
-           
+
 
         }
 
@@ -47,7 +52,7 @@ namespace WalletPlusIncAPI.Services.Implementation
         {
             ServiceResponse<AppUserReadDto> response = new ServiceResponse<AppUserReadDto>();
 
-             var checkUser = await FindAppUserByEmailAsync(model.Email);
+            var checkUser = await FindAppUserByEmailAsync(model.Email);
 
             if (checkUser.Success)
             {
@@ -55,7 +60,7 @@ namespace WalletPlusIncAPI.Services.Implementation
                 response.Success = false;
                 return response;
             }
-              
+
             var domainAppUser = _mapper.Map<AppUser>(model);
             domainAppUser.Created_at = DateTime.Now;
 
@@ -63,34 +68,15 @@ namespace WalletPlusIncAPI.Services.Implementation
 
             if (result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(domainAppUser, "Premium");
+                await _userManager.AddToRoleAsync(domainAppUser, "Free");
                 var domainAppReadUser = _mapper.Map<AppUserReadDto>(domainAppUser);
 
-                Wallet wallet = new Wallet()
-                {
-                    Balance = 0,
-                    CurrencyId = model.MainCurrencyId,
-                    IsMain = true,
-                    WalletType = WalletType.Fiat,
-                    OwnerId = domainAppReadUser.Id
-                };
-                Wallet wallet2 = new Wallet()
-                {
-                    Balance = 0,
-                    CurrencyId = model.MainCurrencyId,
-                    IsMain = true,
-                    WalletType = WalletType.Point,
-                    OwnerId = domainAppReadUser.Id
-                };
-
-                await _walletService.AddWalletAsync(wallet);
-                await _walletService.AddWalletAsync(wallet2);
-                //await _emailSender.SendEmailAsync(message);
+                await _walletService.CreateInstantWallets(domainAppReadUser.Id, model.MainCurrencyId);
 
                 response.Message = "user created successfully";
                 response.Success = true;
                 response.Data = domainAppReadUser;
-               
+
                 return response;
             }
             else
@@ -104,12 +90,12 @@ namespace WalletPlusIncAPI.Services.Implementation
 
         }
 
-      
+
 
         public async Task<ServiceResponse<string>> UpdateUserAsync(AppUser user, AppUserUpdateDto model)
         {
             ServiceResponse<string> response = new ServiceResponse<string>();
-            
+
             if (user == null)
             {
                 response.Message = "Sorry! You cannot perform this operation";
@@ -145,13 +131,13 @@ namespace WalletPlusIncAPI.Services.Implementation
                 parameters.PageSize));
         }
 
-        
+
         public async Task<ServiceResponse<AppUser>> GetUserAsync(string id)
         {
             ServiceResponse<AppUser> response = new ServiceResponse<AppUser>();
 
             var user = await _userManager.FindByIdAsync(id);
-            
+
             if (user == null)
             {
                 response.Success = false;
@@ -260,16 +246,36 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
+        public async Task<ServiceResponse<bool>> CreateUserRoleAsync(CreateRoleDto model)
+        {
+            var response = new ServiceResponse<bool>();
+
+            var result = await _roleManager.CreateAsync(new IdentityRole(model.role));
+
+
+            if (result.Succeeded)
+            {
+                response.Message = "user role has been created";
+                response.Success = true;
+                return response;
+            }
+            else
+                response.Success = false;
+                response.Message = "role not created";
+
+            return response;
+        }
+
 
         public void AddUserToRole(AppUser user, string role)
         {
             _userManager.AddToRoleAsync(user, role);
         }
 
-      
+
         public async Task<ServiceResponse<string>> ChangePasswordAsync(ChangePasswordDto model)
         {
-           var response = new ServiceResponse<string>();
+            var response = new ServiceResponse<string>();
             if (model == null)
             {
                 response.Message = "All fields are required";
@@ -299,7 +305,7 @@ namespace WalletPlusIncAPI.Services.Implementation
             return response;
         }
 
-         public async Task<ServiceResponse<string>> ActivateUserAsync(string id)
+        public async Task<ServiceResponse<string>> ActivateUserAsync(string id)
         {
             ServiceResponse<string> response = new ServiceResponse<string>();
             var user = await _userManager.FindByIdAsync(id);
@@ -324,7 +330,7 @@ namespace WalletPlusIncAPI.Services.Implementation
 
         public async Task<ServiceResponse<string>> DeactivateUserAsync(string id)
         {
-           var response = new ServiceResponse<string>();
+            var response = new ServiceResponse<string>();
             var user = await _userManager.FindByIdAsync(id);
 
             if (user == null)
@@ -350,5 +356,74 @@ namespace WalletPlusIncAPI.Services.Implementation
             var result = await GetMyDetailsAsync();
             return result.Data.IsActive;
         }
+
+        public async Task<ServiceResponse<ImageAddedDto>> ChangePictureAsync(AppUser user, AddImageDto model)
+        {
+            ServiceResponse<ImageAddedDto> response = new ServiceResponse<ImageAddedDto>();
+            var result = await _imageService.UploadImageAsync(model.Image);
+            string publicId = result.PublicId;
+            string url = result.Url.ToString();
+
+            if (publicId == null || url == null)
+            {
+                response.Message = "An error occured while trying to upload your image";
+                return response;
+            }
+
+            var userToUpdate = await _userManager.FindByEmailAsync(user.Email);
+
+            if (userToUpdate is null)
+            {
+                response.Message = "Could not find user";
+                return response;
+            }
+
+            userToUpdate.PublicId = publicId;
+            userToUpdate.AvatarUrl = url;
+
+            var userResult = await _userManager.UpdateAsync(userToUpdate);
+
+            if (userResult.Succeeded)
+            {
+                var responseDTO = new ImageAddedDto
+                {
+                    PublicId = publicId,
+                    Url = url
+                };
+
+                response.Message = "Image Uploaded successfully!";
+                response.Success = true;
+                response.Data = responseDTO;
+            }
+            else
+                response.Message = "Could not upload image";
+
+            return response;
+        }
+
+        public async Task<LoginResult> ExternalLoginForGoogleAsync(UserLoginInfo info, GoogleJsonWebSignature.Payload payload, AppUserLoginDto appUserLoginDto, IUrlHelper url, string requestScheme)
+        {
+            var appUser = new AppUser { UserName = payload.GivenName, Email = payload.Email, FirstName = payload.GivenName, LastName = payload.FamilyName, AvatarUrl = payload.Picture, Created_at = DateTime.Now };
+            await _userManager.CreateAsync(appUser);
+            //prepare and send an email for the email confirmation
+            await _userManager.AddToRoleAsync(appUser, "Free");
+            await _userManager.AddLoginAsync(appUser, info);
+
+            var roles = await _authenticationManager.GetRolesAsync(appUserLoginDto);
+            var token = await _authenticationManager.CreateTokenAsync(appUser);
+            var user = await FindAppUserByEmailAsync(appUserLoginDto.Email);
+
+            await _walletService.CreateInstantWallets(user.Data.Id, 19);
+
+            return (new LoginResult
+            {
+                UserName = appUserLoginDto.Email,
+                Role = roles,
+                AccessToken = token.AccessToken,
+                Name = user.Data.UserName
+            });
+
+        }
+
     }
 }

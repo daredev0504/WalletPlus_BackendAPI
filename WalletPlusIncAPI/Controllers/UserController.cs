@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using WalletPlusIncAPI.Helpers.ImageService;
 using WalletPlusIncAPI.Models.Dtos.AppUser;
 using WalletPlusIncAPI.Models.Entities;
 using WalletPlusIncAPI.Services.Interfaces;
@@ -85,6 +86,21 @@ namespace WalletPlusIncAPI.Controllers
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto model)
         {
             var result = await _appUserService.ChangePasswordAsync(model);
+            if (result.Success) return Ok(result);
+            return BadRequest(result);
+        }
+
+         /// <summary>
+        /// Implements image upload using cloudinary
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPatch("change-picture")]
+        public async Task<IActionResult> ChangePicture([FromForm] AddImageDto model)
+        {
+            var user = _userManager.GetUserAsync(User).Result;
+            var result = await _appUserService.ChangePictureAsync(user, model);
             if (result.Success) return Ok(result);
             return BadRequest(result);
         }

@@ -34,6 +34,13 @@
             <param name="changeMainCurrencyDto"></param>
             <returns>Response</returns>
         </member>
+        <member name="M:WalletPlusIncAPI.Controllers.AdminController.CreateNewUserRole(WalletPlusIncAPI.Models.Dtos.AppUser.CreateRoleDto)">
+            <summary>
+            create a new user role
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
         <member name="M:WalletPlusIncAPI.Controllers.AdminController.ChangeUserAccountType(System.String,WalletPlusIncAPI.Models.Dtos.AppUser.ChangeUserAccountTypeDto)">
             <summary>
             Admin can Promote or demote an account type
@@ -68,9 +75,16 @@
             <param name="appUserLogin"></param>
             <returns></returns>
         </member>
+        <member name="M:WalletPlusIncAPI.Controllers.AuthController.ExternalLogin(WalletPlusIncAPI.Models.Dtos.AppUser.ExternalAuthDto)">
+            <summary>
+            
+            </summary>
+            <param name="externalAuth"></param>
+            <returns></returns>
+        </member>
         <member name="M:WalletPlusIncAPI.Controllers.AuthController.GetUser(System.String)">
             <summary>
-            Allows only logged-in admin to account details of any user
+            Allows only logged-in admin to get the account details of any user
             </summary>
             <param name="id"></param>
             <returns></returns>
@@ -79,6 +93,20 @@
             <summary>
             Allows any logged in user to get his/her account details
             </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.AuthController.ResetPassword(WalletPlusIncAPI.Models.Dtos.AppUser.ResetPasswordDto)">
+            <summary>
+            reset your password
+            </summary>
+            <param name="resetPasswordDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.AuthController.ForgotPassword(WalletPlusIncAPI.Models.Dtos.AppUser.ForgotPasswordDto)">
+            <summary>
+            forgotten password
+            </summary>
+            <param name="forgotPasswordDto"></param>
             <returns></returns>
         </member>
         <member name="T:WalletPlusIncAPI.Controllers.BaseApiController">
@@ -101,6 +129,50 @@
         <member name="M:WalletPlusIncAPI.Controllers.CurrencyController.GetAllCurrencies">
             <summary>
             Get all country codes
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:WalletPlusIncAPI.Controllers.FollowController">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.FollowController.GetAllUsers(WalletPlusIncAPI.Helpers.RequestFeatures.AppUserParameters)">
+            <summary>
+            get all Users
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.FollowController.GetUser(System.String)">
+            <summary>
+            get a user
+            </summary>
+            <param name="userId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.FollowController.Follow(WalletPlusIncAPI.Models.Dtos.Follow.ToBeFollowedDto)">
+            <summary>
+            follow a user
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.FollowController.UnFollow(WalletPlusIncAPI.Models.Dtos.Follow.ToBeUnFollowedDto)">
+            <summary>
+            unfollow a user
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.FollowController.GetFollowers">
+            <summary>
+            get the number of users following you
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.FollowController.GetFollowing">
+            <summary>
+            get the number of users you are following
             </summary>
             <returns></returns>
         </member>
@@ -179,10 +251,24 @@
             <param name="model"></param>
             <returns></returns>
         </member>
+        <member name="M:WalletPlusIncAPI.Controllers.UserController.ChangePicture(WalletPlusIncAPI.Helpers.ImageService.AddImageDto)">
+            <summary>
+            Implements image upload using cloudinary
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
         <member name="T:WalletPlusIncAPI.Controllers.WalletController">
             <summary>
             Wallet Controller
             </summary>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.WalletController.CreateWallet(WalletPlusIncAPI.Models.Dtos.Wallet.WalletCreateDto)">
+            <summary>
+            Allows logged in Premium or Free account holders to create a wallet
+            </summary>
+            <param name="walletCreateDto"></param>
+            <returns></returns>
         </member>
         <member name="M:WalletPlusIncAPI.Controllers.WalletController.DeleteWallet(System.Guid)">
             <summary>
@@ -228,6 +314,12 @@
         <member name="M:WalletPlusIncAPI.Controllers.WalletController.GetAllMyWallets">
             <summary>
             Allows Premium account holder to get all their wallet(s)
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WalletPlusIncAPI.Controllers.WalletController.GetMainWlletsDetails">
+            <summary>
+            Allows Premium account holder to get all their main wallets details
             </summary>
             <returns></returns>
         </member>

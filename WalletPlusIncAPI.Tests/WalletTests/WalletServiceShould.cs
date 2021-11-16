@@ -18,7 +18,7 @@ namespace WalletPlusIncAPI.Tests.WalletTests
 {
     public class WalletServiceShould
     {
-          private readonly WalletService _sut;
+        private readonly WalletService _sut;
         private IServiceProvider _serviceProvider;
         public Mock<IWalletService> mockWalletService { get; set; } = new Mock<IWalletService>();
         public Mock<ICurrencyService> mockCurrencyService { get; set; } = new Mock<ICurrencyService>();
@@ -27,35 +27,37 @@ namespace WalletPlusIncAPI.Tests.WalletTests
         public Mock<IWalletRepository> mockWalletRepository { get; set; } = new Mock<IWalletRepository>();
         public Mock<IHttpContextAccessor> mockHttpContext { get; set; } = new Mock<IHttpContextAccessor>();
         public Mock<IMapper> mockMapper { get; set; } = new Mock<IMapper>();
-          public Mock<ITransactionService> mockTransactionService { get; set; } = new Mock<ITransactionService>();
+        public Mock<ITransactionService> mockTransactionService { get; set; } = new Mock<ITransactionService>();
+          public Mock<ILoggerService> mockLoggerService { get; set; } = new Mock<ILoggerService>();
 
         public WalletServiceShould()
         {
-              var store = new Mock<IUserStore<AppUser>>();
+            var store = new Mock<IUserStore<AppUser>>();
             var userManager = new Mock<UserManager<AppUser>>(store.Object, null, null, null, null, null, null, null, null);
             var mockServiceProvider = new Mock<IServiceProvider>(MockBehavior.Strict);
             mockServiceProvider.Setup(provide => provide.GetService(typeof(IAppUserService))).Returns(mockAppUserService.Object).Verifiable();
             mockServiceProvider.Setup(provide => provide.GetService(typeof(IWalletService))).Returns(mockWalletService.Object).Verifiable();
             mockServiceProvider.Setup(provide => provide.GetService(typeof(ICurrencyService))).Returns(mockCurrencyService.Object).Verifiable();
             mockServiceProvider.Setup(provide => provide.GetService(typeof(IFundingService))).Returns(mockFundingService.Object).Verifiable();
-              mockServiceProvider.Setup(provide => provide.GetService(typeof(IWalletRepository))).Returns(mockWalletRepository.Object).Verifiable();
-             mockServiceProvider.Setup(provide => provide.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpContext.Object).Verifiable();
-             mockServiceProvider.Setup(provide => provide.GetService(typeof(IMapper))).Returns(mockMapper.Object).Verifiable();
-               mockServiceProvider.Setup(provide => provide.GetService(typeof(ITransactionService))).Returns(mockTransactionService.Object).Verifiable();
-          
+            mockServiceProvider.Setup(provide => provide.GetService(typeof(IWalletRepository))).Returns(mockWalletRepository.Object).Verifiable();
+            mockServiceProvider.Setup(provide => provide.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpContext.Object).Verifiable();
+            mockServiceProvider.Setup(provide => provide.GetService(typeof(IMapper))).Returns(mockMapper.Object).Verifiable();
+            mockServiceProvider.Setup(provide => provide.GetService(typeof(ITransactionService))).Returns(mockTransactionService.Object).Verifiable();
+            mockServiceProvider.Setup(provide => provide.GetService(typeof(ILoggerService))).Returns(mockLoggerService.Object).Verifiable();
+
             mockServiceProvider.Setup(injector => injector.GetService(typeof(UserManager<AppUser>)))
                 .Returns(userManager.Object).Verifiable();
             _serviceProvider = mockServiceProvider.Object;
         }
 
-         [Fact]
+        [Fact]
         public void CanWithdrawFunds_ShouldReturnTrue()
         {
             //Arrange
             var walletService = new WalletService(_serviceProvider);
             var balance = 5990;
-            var amount = 2000; 
-       
+            var amount = 2000;
+
 
             //Act
             var actual = walletService.CanWithdrawFromWallet(balance, amount);
@@ -63,14 +65,14 @@ namespace WalletPlusIncAPI.Tests.WalletTests
             //Assert
             Assert.True(actual);
         }
-          [Fact]
+        [Fact]
         public void CanWithdrawFunds_ShouldReturnFalse()
         {
             //Arrange
             var walletService = new WalletService(_serviceProvider);
             var balance = 990;
-            var amount = 2000; 
-       
+            var amount = 2000;
+
 
             //Act
             var actual = walletService.CanWithdrawFromWallet(balance, amount);
@@ -79,9 +81,11 @@ namespace WalletPlusIncAPI.Tests.WalletTests
             Assert.False(actual);
         }
 
-         private void MockUp(bool state)
+       
+
+        private void MockUp(bool state)
         {
-             
+
         }
     }
 }

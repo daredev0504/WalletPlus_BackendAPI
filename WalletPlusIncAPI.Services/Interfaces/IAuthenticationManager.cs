@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Google.Apis.Auth;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using WalletPlusIncAPI.Models.Dtos.AppUser;
 using WalletPlusIncAPI.Models.Entities;
@@ -8,9 +9,10 @@ namespace WalletPlusIncAPI.Services.Interfaces
 {
     public interface IAuthenticationManager
     {
-        Task<bool> ValidateUser(AppUserLoginDto userForAuth);
-        Task<JwtAuthResult> CreateToken(AppUser appUser);
-        Task<IList<string>> GetRoles(AppUserLoginDto model);
+        Task<GoogleJsonWebSignature.Payload> VerifyGoogleTokenAsync(ExternalAuthDto externalAuth);
+        Task<bool> ValidateUserAsync(AppUserLoginDto userForAuth);
+        Task<JwtAuthResult> CreateTokenAsync(AppUser appUser);
+        Task<IList<string>> GetRolesAsync(AppUserLoginDto model);
         Task<bool> ConfirmUserEmail(string token, string email);
        //Task<AppUser> AuthenticateExternalLoginGooggle(GoogleJsonWebSignature.Payload payload);
        

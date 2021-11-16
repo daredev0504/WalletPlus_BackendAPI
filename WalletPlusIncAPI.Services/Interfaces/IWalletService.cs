@@ -11,7 +11,9 @@ namespace WalletPlusIncAPI.Services.Interfaces
     public interface IWalletService
     {
         string GetUserId();
-        Task<ServiceResponse<bool>> AddWalletAsync(Wallet wallet);
+
+        Task CreateInstantWallets(string ownerId, int currencyId);
+        Task<ServiceResponse<bool>> AddWalletAsync(int currencyId);
         Task<ServiceResponse<bool>> DeleteWalletAsync(Guid id);
         Task<ServiceResponse<bool>> UpdateWalletAsync(Wallet wallet);
         Task<ServiceResponse<bool>> UpdateWallet2Async(WalletUpdateDto updateWalletDto);
@@ -19,7 +21,7 @@ namespace WalletPlusIncAPI.Services.Interfaces
         ServiceResponse<bool> CheckWallet(Guid walletId);
 
         ServiceResponse<List<WalletReadDto>> GetAllMyWallets();
-
+         Task<MainWalletReadDto> GetMyMainWalletDetails();
         ServiceResponse<Wallet> GetWalletById(Guid? id);
         Task<Wallet> GetFiatWalletByIdAsync(string userId);
         Task<string>GetFiatWalletBalanceAsync();

@@ -22,18 +22,39 @@ namespace WalletPlusIncAPI.Controllers
         private readonly ICurrencyService _currencyService;
         private readonly IAppUserService _appUserService;
         private readonly IFundingService _fundsService;
-         
 
-        
+
+
         public WalletController(IServiceProvider serviceProvider)
         {
             _walletService = serviceProvider.GetRequiredService<IWalletService>();
             _currencyService = serviceProvider.GetRequiredService<ICurrencyService>();
             _appUserService = serviceProvider.GetRequiredService<IAppUserService>();
             _fundsService = serviceProvider.GetRequiredService<IFundingService>();
-             
+
         }
 
+
+        /// <summary>
+        /// Allows logged in Premium or Free account holders to create a wallet
+        /// </summary>
+        /// <param name="walletCreateDto"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Premium, Free")]
+        [HttpPost("createWallet")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        [ServiceFilter(typeof(ValidateUserActiveAttribute))]
+        public async Task<IActionResult> CreateWallet(WalletCreateDto walletCreateDto)
+        {
+            var result = await _walletService.AddWalletAsync(walletCreateDto.CurrencyId);
+
+            if (!result.Data)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
 
         /// <summary>
         /// Allows logged in Premium account holders to delete their wallet
@@ -42,16 +63,17 @@ namespace WalletPlusIncAPI.Controllers
         /// <returns></returns>
         [Authorize(Roles = "Premium")]
         [HttpDelete("deleteWallet/{id}")]
+        [ServiceFilter(typeof(ValidateUserActiveAttribute))]
         public async Task<IActionResult> DeleteWallet(Guid id)
         {
             var result = await _walletService.DeleteWalletAsync(id);
 
             if (!result.Success)
             {
-                 return BadRequest(ResponseMessage.Message("Unable to delete wallet", "error encountered while deleting the wallet", id));
-                
+                return BadRequest(ResponseMessage.Message("Unable to delete wallet", "error encountered while deleting the wallet", id));
+
             }
-               
+
 
             return Ok(result);
         }
@@ -64,6 +86,7 @@ namespace WalletPlusIncAPI.Controllers
         [Authorize(Roles = "Admin, Premium")]
         [HttpPut("update")]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
+        [ServiceFilter(typeof(ValidateUserActiveAttribute))]
         public async Task<IActionResult> UpdateWallet(WalletUpdateDto walletDto)
         {
             var wallet = _walletService.GetWalletById(walletDto.WalletId);
@@ -91,19 +114,20 @@ namespace WalletPlusIncAPI.Controllers
         /// <returns></returns>
         [Authorize(Roles = "Admin")]
         [HttpGet("getWalletDetail/{id}")]
+        [ServiceFilter(typeof(ValidateUserActiveAttribute))]
         public IActionResult GetWallet(Guid id)
         {
             var result = _walletService.GetWalletById(id);
 
             if (result == null)
             {
-                 return BadRequest(ResponseMessage.Message("Wallet not found", "invalid wallet id", id));
+                return BadRequest(ResponseMessage.Message("Wallet not found", "invalid wallet id", id));
             }
-               
+
 
             return Ok(result);
         }
-        
+
         /// <summary>
         /// send funds to other registered users
         /// </summary>
@@ -112,9 +136,10 @@ namespace WalletPlusIncAPI.Controllers
         [Authorize(Roles = "Premium")]
         [HttpPost("fundRegisteredUserWallet")]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
+        [ServiceFilter(typeof(ValidateUserActiveAttribute))]
         public async Task<IActionResult> FundOthersWallet(FundOthersDto fundingDto)
         {
-          
+
             var result = await _walletService.FundOthersAsync(fundingDto);
             if (result.Success == false)
                 return BadRequest(result);
@@ -143,7 +168,7 @@ namespace WalletPlusIncAPI.Controllers
             return Ok(result);
         }
 
-      
+
         /// <summary>
         /// Allows Premium account holder to debit their wallets
         /// </summary>
@@ -152,6 +177,7 @@ namespace WalletPlusIncAPI.Controllers
         [Authorize(Roles = "Premium")]
         [HttpPost("withdrawFromWallet")]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
+        [ServiceFilter(typeof(ValidateUserActiveAttribute))]
         public async Task<IActionResult> WithdrawFromWallet(WithdrawalDto withdrawalDto)
         {
             var result = await _walletService.WithdrawFromWalletAsync(withdrawalDto);
@@ -168,6 +194,7 @@ namespace WalletPlusIncAPI.Controllers
         /// <returns></returns>
         [Authorize(Roles = "Premium")]
         [HttpGet("getAllMyWallets")]
+        [ServiceFilter(typeof(ValidateUserActiveAttribute))]
         public IActionResult GetAllMyWallets()
         {
             var result = _walletService.GetAllMyWallets();
@@ -175,7 +202,24 @@ namespace WalletPlusIncAPI.Controllers
             {
                 return Ok(result);
             }
-           return BadRequest(result);
+            return BadRequest(result);
+        }
+
+         /// <summary>
+        /// Allows Premium account holder to get all their main wallets details
+        /// </summary>
+        /// <returns></returns>
+        [Authorize(Roles = "Premium, Free")]
+        [HttpGet("getMyMainWalletsDetails")]
+        [ServiceFilter(typeof(ValidateUserActiveAttribute))]
+        public async Task<IActionResult> GetMainWlletsDetails()
+        {
+            var result = await _walletService.GetMyMainWalletDetails();
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
         }
 
         /// <summary>
@@ -184,6 +228,7 @@ namespace WalletPlusIncAPI.Controllers
         /// <returns></returns>
         [Authorize(Roles = "Premium")]
         [HttpGet("fiatBalance")]
+        [ServiceFilter(typeof(ValidateUserActiveAttribute))]
         public async Task<IActionResult> GetFiatWalletBalance()
         {
             var result = await _walletService.GetFiatWalletBalanceAsync();
@@ -197,6 +242,7 @@ namespace WalletPlusIncAPI.Controllers
         /// <returns></returns>
         [Authorize(Roles = "Premium")]
         [HttpGet("pointBalance")]
+        [ServiceFilter(typeof(ValidateUserActiveAttribute))]
         public async Task<IActionResult> GetPointWallet()
         {
             var result = await _walletService.GetPointWalletBalanceAsync();
@@ -207,7 +253,7 @@ namespace WalletPlusIncAPI.Controllers
 
             return BadRequest();
         }
-           
+
 
         /// <summary>
         /// Allows only Admin to get a particular wallet by its Id
@@ -216,6 +262,7 @@ namespace WalletPlusIncAPI.Controllers
         /// <returns></returns>
         [Authorize(Roles = "Admin")]
         [HttpGet("getWalletsByUserId/{id}")]
+        [ServiceFilter(typeof(ValidateUserActiveAttribute))]
         public IActionResult GetWalletsByUserId(string id)
         {
             var myWallets = _walletService.GetWalletsByUserId(id);

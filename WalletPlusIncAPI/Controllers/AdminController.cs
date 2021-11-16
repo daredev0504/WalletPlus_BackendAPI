@@ -14,9 +14,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace WalletPlusIncAPI.Controllers
 {
-   /// <summary>
-   /// Admin Controller
-   /// </summary>
+    /// <summary>
+    /// Admin Controller
+    /// </summary>
     public class AdminController : BaseApiController
     {
         private readonly IFundingService _fundingService;
@@ -94,18 +94,37 @@ namespace WalletPlusIncAPI.Controllers
             return Ok(result);
         }
 
-       /// <summary>
-       /// Admin can Promote or demote an account type
-       /// </summary>
-       /// <param name="userId"></param>
-       /// <param name="changeUserAccountTypeDto"></param>
-       /// <returns></returns>
+
+        /// <summary>
+        /// create a new user role
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin")]
+        [HttpPost("createNewUserRole")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        public async Task<IActionResult> CreateNewUserRole(CreateRoleDto model)
+        {
+            var result = await _appUserService.CreateUserRoleAsync(model);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        /// <summary>
+        /// Admin can Promote or demote an account type
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="changeUserAccountTypeDto"></param>
+        /// <returns></returns>
         [Authorize(Roles = "Admin")]
         [HttpPatch("change-role/{userId}")]
-       [ServiceFilter(typeof(ValidationFilterAttribute))]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> ChangeUserAccountType(string userId, ChangeUserAccountTypeDto changeUserAccountTypeDto)
         {
-            var user =await _appUserService.GetUserAsync(changeUserAccountTypeDto.UserId);
+            var user = await _appUserService.GetUserAsync(changeUserAccountTypeDto.UserId);
             if (user == null)
                 return BadRequest(ResponseMessage.Message("Invalid user Id", "user with the id was not found", changeUserAccountTypeDto));
 
@@ -123,7 +142,7 @@ namespace WalletPlusIncAPI.Controllers
             }
 
             return Ok(ResponseMessage.Message("Account type changed successfully", null, changeUserAccountTypeDto));
-           
+
         }
 
         /// <summary>
@@ -146,16 +165,16 @@ namespace WalletPlusIncAPI.Controllers
                 return BadRequest(ResponseMessage.Message("Invalid wallet Id", "wallet with the id was not found", approveFundingDto));
 
             var funded = await _walletService.FundPremiumWalletAsync(funding);
-            
+
             if (!funded.Success)
                 return BadRequest(ResponseMessage.Message("Unable to fund account", "and error was encountered while trying to fund this account", approveFundingDto));
 
             await _fundingService.DeleteFundingAsync(approveFundingDto.FundingId);
 
-            return Ok(ResponseMessage.Message("Free account funded", null, approveFundingDto));
+            return Ok(ResponseMessage.Message("Premium account funded", null, approveFundingDto));
         }
 
-       
+
 
     }
 }

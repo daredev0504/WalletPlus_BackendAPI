@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -19,7 +20,7 @@ namespace WalletPlusIncAPI.Services.AuthManager
         private readonly IConfiguration _configuration;
         private AppUser _user;
         private readonly IConfigurationSection _goolgeSettings;
-     
+
 
         public AuthenticationManager(UserManager<AppUser> userManager, IConfiguration configuration)
         {
@@ -28,7 +29,7 @@ namespace WalletPlusIncAPI.Services.AuthManager
             _goolgeSettings = _configuration.GetSection("web");
         }
 
-        public async Task<bool> ValidateUser(AppUserLoginDto model)
+        public async Task<bool> ValidateUserAsync(AppUserLoginDto model)
         {
             _user = await _userManager.FindByEmailAsync(model.Email);
             return (_user != null &&
@@ -43,7 +44,7 @@ namespace WalletPlusIncAPI.Services.AuthManager
             {
                 return false;
             }
-               
+
             var result = await _userManager.ConfirmEmailAsync(user, token);
             if (result.Succeeded)
             {
@@ -55,14 +56,14 @@ namespace WalletPlusIncAPI.Services.AuthManager
 
 
 
-        public async Task<IList<string>> GetRoles(AppUserLoginDto model)
+        public async Task<IList<string>> GetRolesAsync(AppUserLoginDto model)
         {
             _user = await _userManager.FindByEmailAsync(model.Email);
             var roles = await _userManager.GetRolesAsync(_user);
             return roles;
         }
 
-        public async Task<JwtAuthResult> CreateToken(AppUser appUser)
+        public async Task<JwtAuthResult> CreateTokenAsync(AppUser appUser)
         {
             var signingCredentials = GetSigningCredentials();
             var claims = await GetClaims(appUser);
@@ -72,6 +73,24 @@ namespace WalletPlusIncAPI.Services.AuthManager
             {
                 AccessToken = accesToken
             };
+        }
+
+        public async Task<GoogleJsonWebSignature.Payload> VerifyGoogleTokenAsync(ExternalAuthDto externalAuth)
+        {
+            try
+            {
+                var settings = new GoogleJsonWebSignature.ValidationSettings()
+                {
+                    Audience = new List<string>() { _goolgeSettings.GetSection("client_id").Value }
+                };
+                var payload = await GoogleJsonWebSignature.ValidateAsync(externalAuth.IdToken, settings);
+                return payload;
+            }
+            catch (Exception ex)
+            {
+                //log an exception
+                return null;
+            }
         }
 
 
@@ -95,7 +114,7 @@ namespace WalletPlusIncAPI.Services.AuthManager
                 new Claim(ClaimTypes.NameIdentifier, appUser.Id)
             };
             var roles = await _userManager.GetRolesAsync(appUser);
-            foreach (var role in  roles)
+            foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role,
                     role));

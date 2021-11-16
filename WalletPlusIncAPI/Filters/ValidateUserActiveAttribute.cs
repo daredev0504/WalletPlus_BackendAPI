@@ -24,7 +24,8 @@ namespace Commander.API.ActionFilters
             if (check)
             {
                 _logger.LogInfo($"user is Active");
-                context.Result = new OkResult();
+                //context.Result = new OkObjectResult("user is active");
+                await next();
             }
             else
             {

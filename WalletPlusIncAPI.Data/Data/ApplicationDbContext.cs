@@ -19,6 +19,7 @@ namespace WalletPlusIncAPI.Data.Data
         public DbSet<Currency> Currencies { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Wallet> Wallets { get; set; }
+         public DbSet<Followers> Followers { get; set; }
      
       
 
@@ -46,11 +47,7 @@ namespace WalletPlusIncAPI.Data.Data
                 .Property(s => s.WalletType)
                 .HasConversion<string>();
 
-            //modelBuilder.Entity<Followers>()
-            //    .HasNoKey();
-
-            //modelBuilder.ApplyConfiguration(new AppUserConfig());
-            //modelBuilder.ApplyConfiguration(new RoleConfig());
+          
 
 
         }

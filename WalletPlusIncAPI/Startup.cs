@@ -11,6 +11,8 @@ using WalletPlusIncAPI.Extensions;
 using WalletPlusIncAPI.Filters;
 using WalletPlusIncAPI.Models.Entities;
 using Commander.API.ActionFilters;
+using WalletManagementAPI.Helper.MailService;
+using WalletPlusIncAPI.Helpers.ImageService;
 
 namespace WalletPlusIncAPI
 {
@@ -32,22 +34,23 @@ namespace WalletPlusIncAPI
             //services.ConfigureDbContext(Configuration);
             services.ConfigureDbContextForPostgresql(Configuration);
 
-                services.AddCors(options =>
-                {
-                    options.AddPolicy("CorsPolicy", builder =>
-                        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-                });
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", builder =>
+                    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            });
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSignalR();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            
+
             services.ConfigureAddIdentity();
-            
+
             services.ConfigureAuthManager();
             services.ConfigureJwt(Configuration);
             services.ConfigureLoggerService();
             services.ConfigureWalletService();
+            services.ConfigureImageService();
             services.ConfigureTransactionService();
             services.ConfigureFundingService();
             services.ConfigureCurrencyService();
@@ -56,9 +59,12 @@ namespace WalletPlusIncAPI
             services.ConfigureCurrencyRepository();
             services.ConfigureFundsRepository();
             services.ConfigureAppUserService();
+            services.ConfigureEmailService();
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.Configure<AccountSettings>(Configuration.GetSection("AccountSettings"));
             services.AddScoped<ValidationFilterAttribute>();
             services.AddScoped<ValidateUserActiveAttribute>();
-          
+
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ApplicationDbContext context, UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
@@ -68,7 +74,7 @@ namespace WalletPlusIncAPI
                 app.UseDeveloperExceptionPage();
             }
             app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WalletManagementAPI v1"));
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WalletPlusIncAPI v1"));
             //app.UseHttpsRedirection();
 
             app.UseRouting();
